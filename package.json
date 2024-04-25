@@ -1,0 +1,36 @@
+{
+  "name": "ascii-silouette",
+  "version": "1.1.0",
+  "type": "module",
+  "module": "./dist/ascii-silouette.es.js",
+  "scripts": {
+    "clean": "rimraf ./dist ./bin",
+    "dev": "npx tsx src/main.ts",
+    "build": "npm run clean && rollup -c",
+    "pack": "npm pack && shx mkdir -p bin && shx mv *.tgz bin/ascii-silouette.tgz",
+    "all": "npm run build && npm run pack",
+    "install-global": "npm install -g ./bin/ascii-silouette.tgz",
+    "uninstall-global": "npm uninstall -g ascii-silouette",
+    "run-global": "cpi-fetcher"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^20.12.2",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.13.0",
+    "shx": "^0.3.4",
+    "tslib": "^2.6.2",
+    "tsx": "^4.7.1",
+    "typescript": "^5.2.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "ascii-silouette": "./dist/ascii-silouette.es.js"
+  },
+  "dependencies": {
+  }
+}
+
