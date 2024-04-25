@@ -17,12 +17,13 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.12.2",
+    "@types/sharp": "^0.32.0",
     "rimraf": "^5.0.5",
     "rollup": "^4.13.0",
     "shx": "^0.3.4",
     "tslib": "^2.6.2",
     "tsx": "^4.7.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.4.5"
   },
   "files": [
     "dist"
@@ -31,6 +32,6 @@
     "ascii-silouette": "./dist/ascii-silouette.es.js"
   },
   "dependencies": {
+    "sharp": "^0.33.3"
   }
 }
-
