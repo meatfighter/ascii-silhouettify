@@ -1,11 +1,22 @@
 import sharp from 'sharp';
 
 const GLYPHS_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/printable-ascii-bw.png';
+const INPUT_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/circle.png';
 
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
 
-async function loadGlyphs(): Promise<boolean[][][]> {
+class Glyph {
+    character: string;
+    pixels: boolean[][];
+
+    constructor(character: string, pixels: boolean[][]) {
+        this.character = character;
+        this.pixels = pixels;
+    }
+}
+
+async function loadGlyphs(): Promise<Glyph[]> {
     const image = sharp(GLYPHS_IMAGE_FILENAME);
 
     const metadata = await image.metadata();
@@ -18,21 +29,24 @@ async function loadGlyphs(): Promise<boolean[][][]> {
 
     console.log(`${glyphWidth} ${glyphHeight}`);
 
-    const glyphs: boolean[][][] = new Array<boolean[][]>(PRINTABLE_ASCII.length);
+    const glyphs = new Array<Glyph>(PRINTABLE_ASCII.length);
     for (let i = PRINTABLE_ASCII.length - 1; i >= 0; --i) {
-        glyphs[i] = new Array<boolean[]>(glyphHeight);
+        const pixels = new Array<boolean[]>(glyphHeight);
         for (let j = glyphHeight - 1; j >= 0; --j) {
-            glyphs[i][j] = new Array<boolean>(glyphWidth);
+            pixels[j] = new Array<boolean>(glyphWidth);
         }
+        glyphs[i] = new Glyph(PRINTABLE_ASCII[i], pixels);
     }
 
     const pixels = await image.raw().toColourspace('b-w').toBuffer();
     for (let i = glyphs.length - 1; i >= 0; --i) {
         const glyph = glyphs[i];
-        for (let j = glyph.length - 1; j >= 0; --j) {
-            const row = glyph[j];
+        const I = i * glyphWidth;
+        for (let j = glyph.pixels.length - 1; j >= 0; --j) {
+            const J = I + j * metadata.width;
+            const row = glyph.pixels[j];
             for (let k = row.length - 1; k >= 0; --k) {
-                row[k] = pixels[i * glyphWidth + j * metadata.width + k] !== 0;
+                row[k] = pixels[J + k] !== 0;
             }
         }
     }
