@@ -4,7 +4,7 @@ import * as ss from 'simple-statistics';
 import * as os from 'os';
 
 const GLYPHS_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/printable-ascii-bw-2.png';
-const INPUT_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/ubuntu.png';
+const INPUT_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/xbox.png';
 const PALETTE_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/palette.png';
 
 const BLACK_LUMINANCE = 10;
@@ -95,8 +95,6 @@ function findClosestColor(r: number, g: number, b: number, a: number) {
     let index = 0;
     const c = chroma(r, g, b).lab();
     c[0] *= alpha;
-    c[1] *= alpha;
-    c[2] *= alpha;
     if (c[0] >= BLACK_LUMINANCE) {
         let error = Number.MAX_VALUE;
         for (let i = 255; i >= 16; --i) {
