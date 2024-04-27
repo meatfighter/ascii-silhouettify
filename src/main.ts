@@ -4,10 +4,10 @@ import * as ss from 'simple-statistics';
 import * as os from 'os';
 
 const GLYPHS_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/printable-ascii-bw-2.png';
-const INPUT_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/ms-office.png';
+const INPUT_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/ubuntu.png';
 const PALETTE_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/palette.png';
 
-const BLACK_LUMINANCE = 0.1;
+const BLACK_LUMINANCE = 10;
 
 const SCALED_GLYPH_WIDTH = 9;
 const SCALED_GLYPH_HEIGHT = 19;
@@ -247,8 +247,8 @@ function convert(image: Image, offsetX: number, offsetY: number): Ascii {
 
 function sweepConvert(image: Image): Ascii {
     let ascii = new Ascii('', 0);
-    for (let y = 0; y < glyphHeight; ++y) {
-        for (let x = 0; x < glyphWidth; ++x) {
+    for (let y = -glyphHeight; y < glyphHeight; ++y) {
+        for (let x = -glyphWidth; x < glyphWidth; ++x) {
             const a = convert(image, x, y);
             if (a.matched > ascii.matched) {
                 ascii = a;
