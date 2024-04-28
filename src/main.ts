@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import sharp from 'sharp';
 import chroma from 'chroma-js';
 import * as ss from 'simple-statistics';

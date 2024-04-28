@@ -9,6 +9,11 @@ export default {
         format: 'es',
         interop: 'esModule',
     },
+    external: [
+        'chroma-js',
+        'sharp',
+        'simple-statistics'
+    ],
     plugins: [
         resolve(),
         typescript(),
