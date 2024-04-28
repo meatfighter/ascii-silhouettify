@@ -1,6 +1,7 @@
 import * as os from 'os';
 import { glyphHeight, glyphMinCount, glyphs, glyphWidth } from '@/glyphs';
 import { Image } from '@/images';
+import { htmlColors } from '@/colors';
 
 export class Ascii {
     text: string;
@@ -12,8 +13,8 @@ export class Ascii {
     }
 }
 
-function toAscii(image: Image, offsetX: number, offsetY: number, imageScale: number, scaledGlyphWidth: number,
-                 scaledGlyphHeight: number): Ascii {
+function toMonochromeAscii(image: Image, offsetX: number, offsetY: number, imageScale: number, scaledGlyphWidth: number,
+                           scaledGlyphHeight: number, html: boolean): Ascii {
 
     const scaledImageWidth = imageScale * image.width;
     const scaledImageHeight = imageScale * image.height;
@@ -86,7 +87,7 @@ function toAscii(image: Image, offsetX: number, offsetY: number, imageScale: num
             }
 
             // Append the printable ASCII character.
-            text += glyphs[glyphIndex].character;
+            text += html ? glyphs[glyphIndex].htmlEscapedCharacter : glyphs[glyphIndex].character;
 
             // Tally the number of glyph pixels that align with image pixels.
             matched += glyphs[glyphIndex].count;
@@ -97,8 +98,8 @@ function toAscii(image: Image, offsetX: number, offsetY: number, imageScale: num
     return new Ascii(text, matched);
 }
 
-function toAnsi(image: Image, offsetX: number, offsetY: number, imageScale: number, scaledGlyphWidth: number,
-                scaledGlyphHeight: number): Ascii {
+function toColorAscii(image: Image, offsetX: number, offsetY: number, imageScale: number, scaledGlyphWidth: number,
+                      scaledGlyphHeight: number, html: boolean): Ascii {
 
     const scaledImageWidth = imageScale * image.width;
     const scaledImageHeight = imageScale * image.height;
@@ -115,6 +116,7 @@ function toAnsi(image: Image, offsetX: number, offsetY: number, imageScale: numb
 
     const colorIndexCounts = new Map<number, number>();
     let text = '';
+    let notFirstSpan = false;
     let lastColorIndex = -1;
     let matched = 0;
     for (let r = 0; r < rows; ++r) {
@@ -193,12 +195,20 @@ function toAnsi(image: Image, offsetX: number, offsetY: number, imageScale: numb
             // If the color is different from the previous one, then append the ANSI escape code to set the foreground
             // color to an index of the 256-color palette.
             if (lastColorIndex !== bestColorIndex) {
-                text += `\x1b[38;5;${bestColorIndex}m`;
+                if (html) {
+                    if (notFirstSpan) {
+                        text += "</span>";
+                    }
+                    text += `<span style="color: #${htmlColors[bestColorIndex]};">`;
+                    notFirstSpan = true;
+                } else {
+                    text += `\x1b[38;5;${bestColorIndex}m`;
+                }
                 lastColorIndex = bestColorIndex;
             }
 
             // Append the printable ASCII character.
-            text += glyphs[bestGlyphIndex].character;
+            text += html ? glyphs[bestGlyphIndex].htmlEscapedCharacter : glyphs[bestGlyphIndex].character;
 
             // Tally the number of glyph pixels that align with image pixels.
             matched += glyphs[bestGlyphIndex].count;
@@ -206,21 +216,30 @@ function toAnsi(image: Image, offsetX: number, offsetY: number, imageScale: numb
         text += os.EOL;
     }
 
-    // Append ANSI escape code to reset the text formatting to the terminal's default settings.
-    text += '\x1b[0m';
+    if (html) {
+        if (notFirstSpan) {
+            text += "</span>";
+        }
+    } else {
+        // Append ANSI escape code to reset the text formatting to the terminal's default settings.
+        text += '\x1b[0m';
+    }
 
     return new Ascii(text, matched);
 }
 
 // Repeat the image conversion for various origins within a glyph-sized region and return the best one found.
-export function convert(image: Image, ansi: boolean, imageScale: number, scaledGlyphWidth: number,
-                        scaledGlyphHeight: number): Ascii {
+export function convert(image: Image, color: boolean, imageScale: number, fontSize: number, lineHeight: number,
+                        html: boolean): Ascii {
 
-    const func = ansi ? toAnsi : toAscii;
+    const scaledGlyphWidth = glyphWidth * fontSize / 12;
+    const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
+
+    const func = color ? toColorAscii : toMonochromeAscii;
     let ascii = new Ascii('', 0);
     for (let y = -glyphHeight; y <= 0; ++y) {
         for (let x = -glyphWidth; x <= 0; ++x) {
-            const a = func(image, x, y, imageScale, scaledGlyphWidth, scaledGlyphHeight);
+            const a = func(image, x, y, imageScale, scaledGlyphWidth, scaledGlyphHeight, html);
             if (a.matched > ascii.matched) {
                 ascii = a;
             }

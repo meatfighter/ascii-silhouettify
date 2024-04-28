@@ -7,12 +7,14 @@ const PRINTABLE_ASCII
 
 export class Glyph {
     character: string;
+    htmlEscapedCharacter: string;
     pixels: boolean[][];
     count: number;
 
     constructor(character: string, pixels: boolean[][]) {
         this.character = character;
         this.pixels = pixels;
+
         this.count = 0;
         for (let i = pixels.length - 1; i >= 0; --i) {
             const row = pixels[i];
@@ -21,6 +23,27 @@ export class Glyph {
                     ++this.count;
                 }
             }
+        }
+
+        switch (character) {
+            case '&':
+                this.htmlEscapedCharacter = '&amp;';
+                break;
+            case '<':
+                this.htmlEscapedCharacter = '&lt;';
+                break;
+            case '>':
+                this.htmlEscapedCharacter = '&gt;';
+                break;
+            case '"':
+                this.htmlEscapedCharacter = '&quot;';
+                break;
+            case "'":
+                this.htmlEscapedCharacter = '&apos;';
+                break;
+            default:
+                this.htmlEscapedCharacter = character;
+                break;
         }
     }
 }

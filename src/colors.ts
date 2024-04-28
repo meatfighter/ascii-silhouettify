@@ -16,8 +16,13 @@ const RGBS = 'DAwMxQ8fE6EOwZwAADfaiBeYOpbdzMzMdnZ250hWFsYM+fGlO3j/tACeYdbW8vLyAA
 const buffer = Buffer.from(RGBS, 'base64');
 
 const palette = new Array<number[]>(256);
+export const htmlColors = new Array<string>(256);
 for (let i = 0, j = 0; i < palette.length; ++i) {
-    palette[i] = chroma(buffer[j++], buffer[j++], buffer[j++]).lab();
+    const r = buffer[j++];
+    const g = buffer[j++];
+    const b = buffer[j++];
+    palette[i] = chroma(r, g, b).lab();
+    htmlColors[i] = ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0').toUpperCase();
 }
 
 const closestColorCache = new Map<number, number>();
