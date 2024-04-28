@@ -1,6 +1,6 @@
 {
   "name": "ascii-silouette",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "type": "module",
   "module": "./dist/ascii-silouette.es.js",
   "scripts": {
@@ -11,15 +11,17 @@
     "all": "npm run build && npm run pack",
     "install-global": "npm install -g ./bin/ascii-silouette.tgz",
     "uninstall-global": "npm uninstall -g ascii-silouette",
-    "run-global": "cpi-fetcher"
+    "run-global": "ascii-silouette"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.12.2",
     "@types/sharp": "^0.32.0",
     "rimraf": "^5.0.5",
     "rollup": "^4.13.0",
+    "rollup-plugin-copy": "^3.5.0",
     "shx": "^0.3.4",
     "tslib": "^2.6.2",
     "tsx": "^4.7.1",

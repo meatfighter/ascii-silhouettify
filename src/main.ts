@@ -3,14 +3,16 @@ import chroma from 'chroma-js';
 import * as ss from 'simple-statistics';
 import * as os from 'os';
 
-const GLYPHS_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/printable-ascii-bw-2.png';
-const INPUT_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/xbox.png';
-const PALETTE_IMAGE_FILENAME = 'C:/js-projects/ascii-silhouette/images/palette.png';
+const GLYPHS_IMAGE_FILENAME = 'assets/glyphs.png';
+const INPUT_IMAGE_FILENAME = 'images/google.png';
+const PALETTE_IMAGE_FILENAME = 'images/palette.png';
 
 const BLACK_LUMINANCE = 10;
 
 const SCALED_GLYPH_WIDTH = 9;
 const SCALED_GLYPH_HEIGHT = 19;
+
+const IMAGE_SCALE = 2;
 
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
@@ -176,23 +178,27 @@ class Ascii {
 
 function convert(image: Image, offsetX: number, offsetY: number): Ascii {
 
-    const cols = Math.ceil(image.width / SCALED_GLYPH_WIDTH);
-    const rows = Math.ceil(image.height / SCALED_GLYPH_HEIGHT);
+    const scaledImageWidth = IMAGE_SCALE * image.width;
+    const scaledImageHeight = IMAGE_SCALE * image.height;
+    const cols = Math.ceil(scaledImageWidth / SCALED_GLYPH_WIDTH);
+    const rows = Math.ceil(scaledImageHeight / SCALED_GLYPH_HEIGHT);
     const paddedWidth = Math.ceil(cols * SCALED_GLYPH_WIDTH);
     const paddedHeight = Math.ceil(rows * SCALED_GLYPH_HEIGHT);
-    const originX = offsetX + (image.width - paddedWidth) / 2;
-    const originY = offsetY + (image.height - paddedHeight) / 2;
+    const originX = offsetX + (scaledImageWidth - paddedWidth) / 2;
+    const originY = offsetY + (scaledImageHeight - paddedHeight) / 2;
     const indexArray = new Array<number>();
-    const glyphScaleX = SCALED_GLYPH_WIDTH / glyphWidth;
-    const glyphScaleY = SCALED_GLYPH_HEIGHT / glyphHeight;
+    const glyphScaleX = SCALED_GLYPH_WIDTH / (IMAGE_SCALE * glyphWidth);
+    const glyphScaleY = SCALED_GLYPH_HEIGHT / (IMAGE_SCALE * glyphHeight);
+    const rowScale = SCALED_GLYPH_HEIGHT / IMAGE_SCALE;
+    const colScale = SCALED_GLYPH_WIDTH / IMAGE_SCALE;
 
     let text = '';
     let lastMedianIndex = -1;
     let matched = 0;
     for (let r = 0; r < rows; ++r) {
-        const glyphOriginY = originY + SCALED_GLYPH_HEIGHT * r;
+        const glyphOriginY = originY + rowScale * r;
         for (let c = 0; c < cols; ++c) {
-            const glyphOriginX = originX + SCALED_GLYPH_WIDTH * c;
+            const glyphOriginX = originX + colScale * c;
 
             indexArray.length = 0;
             for (let y = 0; y < glyphHeight; ++y) {
