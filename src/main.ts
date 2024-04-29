@@ -11,15 +11,16 @@ function printUsage() {
     console.log('Usage: ascii-silhouette [options]');
     console.log();
     console.log('Required:');
-    console.log('  -i, --input "..."      Input image filename (png, svg, jpg, webp, gif, tif, heif, avif, pdf)');
+    console.log('  -i, --input "..."      Input image filename (formats: png, svg, jpg, webp, gif, tif, heif, avif, ' +
+        'pdf)');
     console.log();
     console.log('Optional:');
-    console.log('  -o, --output "..."     Output filename (default: stdout) (formats: txt, ans, html)');
-    console.log('  -s, --scale ...        Image scaling factor (default: 1)');
-    console.log('  -f, --font-size ...    Terminal/browser font size (default: 12)');
-    console.log('  -l, --line-height ...  Terminal/browser line height (default: 1.2)');
-    console.log('  -m, --monochrome       For unstyled text, not colored text');
+    console.log('  -o, --output "..."     Output filename (formats: txt, ans, html) (default: stdout)');
     console.log('  -w, --web              For HTML, not ASCII or ANSI (default based on output filename extension)');
+    console.log('  -m, --monochrome       For unstyled text, not colored text');
+    console.log('  -f, --font-size ...    Terminal or browser font size in points (default: 12)');
+    console.log('  -l, --line-height ...  Terminal or browser line height relative to font size (default: 1.2)');
+    console.log('  -s, --scale ...        Input image scaling factor (default: 1)');
     console.log();
     console.log('Other:');
     console.log('  -v, --version          Shows version number');
