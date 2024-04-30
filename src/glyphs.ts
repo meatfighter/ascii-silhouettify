@@ -48,6 +48,7 @@ export class Glyph {
     }
 }
 
+export const glyphTable: number[][] = [];
 export const glyphs = new Array<Glyph>(PRINTABLE_ASCII.length);
 await (async () => {
     const { data, info } = await sharp(GLYPHS_IMAGE_FILENAME).raw().toColourspace('b-w')
@@ -69,6 +70,25 @@ await (async () => {
     }
 
     glyphs.sort((a, b) => a.count - b.count);
+
+    glyphTable.length = glyphWidth * glyphHeight;
+    for (let i = glyphTable.length - 1; i >= 0; --i) {
+        glyphTable[i] = [ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF ];
+    }
+    for (let i = glyphs.length - 1; i >= 0; --i) {
+        const pixels = glyphs[i].pixels;
+        const index = i >> 5;
+        const mask = ~(1 << (i & 31));
+        for (let j = glyphHeight - 1; j >= 0; --j) {
+            const row = pixels[j];
+            const tableOffset = glyphWidth * j;
+            for (let k = row.length - 1; k >= 0; --k) {
+                if (row[k]) {
+                    glyphTable[tableOffset + k][index] &= mask;
+                }
+            }
+        }
+    }
 })();
 
 export const glyphWidth = glyphs[0].pixels[0].length;

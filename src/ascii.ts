@@ -1,5 +1,5 @@
 import * as os from 'os';
-import { glyphHeight, glyphMinCount, glyphs, glyphWidth } from '@/glyphs';
+import { glyphHeight, glyphMinCount, glyphs, glyphTable, glyphWidth } from '@/glyphs';
 import { Image } from '@/images';
 import { htmlColors } from '@/colors';
 
@@ -31,59 +31,36 @@ function toMonochromeAscii(image: Image, offsetX: number, offsetY: number, image
 
     let text = '';
     let matched = 0;
+    const region = new Array<number>(3);
     for (let r = 0; r < rows; ++r) {
         const glyphOriginY = originY + rowScale * r;
         for (let c = 0; c < cols; ++c) {
             const glyphOriginX = originX + colScale * c;
 
-            // Count the number of light pixels within the rectangular region to be replaced by a glyph.
-            let lightCount = 0;
+            region[2] = 0x7FFFFFFF;
+            region[1] = region[0] = 0xFFFFFFFF;
+
             for (let y = 0; y < glyphHeight; ++y) {
                 const glyphY = glyphOriginY + glyphScaleY * y;
+                const tableOffset = glyphWidth * y;
                 for (let x = 0; x < glyphWidth; ++x) {
                     const glyphX = glyphOriginX + glyphScaleX * x;
-
-                    // Do not count very dark pixels.
-                    if (image.getIndex(glyphX, glyphY) !== 0) {
-                        ++lightCount;
+                    if (image.getIndex(glyphX, glyphY) === 0) {
+                        const row = glyphTable[tableOffset + x];
+                        region[2] &= row[2];
+                        region[1] &= row[1];
+                        region[0] &= row[0];
                     }
                 }
             }
 
-            // If the region is very dark, replace it with a space character.
-            if (lightCount === 0) {
-                text += ' ';
-                continue;
-            }
-
-            // Attempt to substitute the region with a glyph starting with the character containing the most pixels
-            // down to the space character. If any of the character's pixels do not align with light pixels within
-            // the image, then that character is excluded.
-            let glyphIndex = 0;
-            outer: for (let i = glyphs.length - 1; i >= 0; --i) {
-                const glyph = glyphs[i];
-                const glyphPixels = glyph.pixels;
-                for (let y = 0; y < glyphHeight; ++y) {
-                    const glyphRow = glyphPixels[y];
-                    const glyphY = glyphOriginY + glyphScaleY * y;
-                    for (let x = 0; x < glyphWidth; ++x) {
-                        const glyphX = glyphOriginX + glyphScaleX * x;
-                        const index = image.getIndex(glyphX, glyphY);
-                        if (glyphRow[x] && index === 0) {
-                            continue outer; // Exclude glyph since one its pixels aligned with a dark image pixel.
-                        }
-                    }
-                }
-                glyphIndex = i; // Use first one found since glyphs are sorted by pixel counts.
-                break;
-            }
-
-
-            // If no best is found, then no non-space character aligns with all the light pixels in the region.
-            // A space is the only acceptable character in that case.
-            if (glyphIndex === 0) {
-                text += ' ';
-                continue;
+            let glyphIndex: number;
+            if (region[2] !== 0) {
+                glyphIndex = 95 - Math.clz32(region[2]);
+            } else if (region[1] !== 0) {
+                glyphIndex = 63 - Math.clz32(region[1]);
+            } else {
+                glyphIndex = 31 - Math.clz32(region[0]);
             }
 
             // Append the printable ASCII character.
@@ -114,6 +91,7 @@ function toColorAscii(image: Image, offsetX: number, offsetY: number, imageScale
     const rowScale = scaledGlyphHeight / imageScale;
     const colScale = scaledGlyphWidth / imageScale;
 
+    const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
     let text = '';
     let notFirstSpan = false;
@@ -159,23 +137,31 @@ function toColorAscii(image: Image, offsetX: number, offsetY: number, imageScale
             let bestGlyphIndex = 0;
             let bestColorIndex = 0;
             colorIndexCounts.forEach((_, colorIndex) => {
-                let glyphIndex = 0;
-                outer: for (let i = glyphs.length - 1; i >= 0; --i) {
-                    const glyph = glyphs[i];
-                    const glyphPixels = glyph.pixels;
-                    for (let y = 0; y < glyphHeight; ++y) {
-                        const glyphRow = glyphPixels[y];
-                        const glyphY = glyphOriginY + glyphScaleY * y;
-                        for (let x = 0; x < glyphWidth; ++x) {
-                            const glyphX = glyphOriginX + glyphScaleX * x;
-                            const index = image.getIndex(glyphX, glyphY);
-                            if (glyphRow[x] && index !== colorIndex) {
-                                continue outer; // Exclude glyph since one its pixels did not match the color index.
-                            }
+
+                region[2] = 0x7FFFFFFF;
+                region[1] = region[0] = 0xFFFFFFFF;
+
+                for (let y = 0; y < glyphHeight; ++y) {
+                    const glyphY = glyphOriginY + glyphScaleY * y;
+                    const tableOffset = glyphWidth * y;
+                    for (let x = 0; x < glyphWidth; ++x) {
+                        const glyphX = glyphOriginX + glyphScaleX * x;
+                        if (image.getIndex(glyphX, glyphY) !== colorIndex) {
+                            const row = glyphTable[tableOffset + x];
+                            region[2] &= row[2];
+                            region[1] &= row[1];
+                            region[0] &= row[0];
                         }
                     }
-                    glyphIndex = i; // Use first one found since glyphs are sorted by pixel counts.
-                    break;
+                }
+
+                let glyphIndex: number;
+                if (region[2] !== 0) {
+                    glyphIndex = 95 - Math.clz32(region[2]);
+                } else if (region[1] !== 0) {
+                    glyphIndex = 63 - Math.clz32(region[1]);
+                } else {
+                    glyphIndex = 31 - Math.clz32(region[0]);
                 }
 
                 // Accept the best character and color combination.
