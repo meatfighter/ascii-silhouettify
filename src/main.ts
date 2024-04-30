@@ -26,7 +26,7 @@ import { loadImage } from '@/images';
 //   -h, --help             Shows this help message`);
 // }
 
-const ascii = convert(await loadImage('images/acrobat.png'), true, 1, 12, 1.2, false);
+const ascii = convert(await loadImage('images/reddit.png'), true, 1, 12, 1.2, false);
 
 console.log(ascii.text);
 console.log(ascii.matched);

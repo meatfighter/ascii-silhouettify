@@ -71,9 +71,25 @@ await (async () => {
 
     glyphs.sort((a, b) => a.count - b.count);
 
+    // Create a table of bit masks, each composed of 95 bits, represented by three 32-bit numbers. Each bit corresponds
+    // to a printable ASCII character ordered by the number of white pixels within each glyph. Bit-0 is the space
+    // character (zero white pixels), bit-94 is the at sign (maximum number of white pixels), and bit-95 is always zero
+    // since there are only 95 printable ASCII characters. Each row of the table corresponds to a pixel of the
+    // rectangular region in which all glyphs are drawn.
+    //
+    // All 95 bits of all table rows are initially set. Then, for each white pixel in each glyph, the bit corresponding
+    // to the glyph in the table row corresponding to the pixel is cleared.
+    //
+    // During image conversion, a 95-bit value is initialized to all ones for each rectangular region to be replaced by
+    // a glyph. Then, for each black/uncolored pixels with the region, the value is bitwise ANDed with the table row
+    // corresponding to the pixel. The idea being if the glyph pixel is white while the region pixel is black/uncolored,
+    // then that particular glyph cannot replace the rectangular region. Since the mask contains a zero at the bit
+    // position corresponding to the glyph, the bitwise AND operation excludes the glyph. After repeating that for all
+    // pixels in the region, the number of leading zero bits is counted in the value. That number corresponds to the
+    // first remaining glyph whose pixels are fully contained within the white/colored pixels of the image.
     glyphTable.length = glyphWidth * glyphHeight;
     for (let i = glyphTable.length - 1; i >= 0; --i) {
-        glyphTable[i] = [ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF ];
+        glyphTable[i] = [ 0x7FFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF ];
     }
     for (let i = glyphs.length - 1; i >= 0; --i) {
         const pixels = glyphs[i].pixels;
