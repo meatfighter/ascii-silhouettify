@@ -16,17 +16,22 @@ const RGBS = 'DAwMxQ8fE6EOwZwAADfaiBeYOpbdzMzMdnZ250hWFsYM+fGlO3j/tACeYdbW8vLyAA
 const buffer = Buffer.from(RGBS, 'base64');
 
 const palette = new Array<number[]>(256);
-export const htmlColors = new Array<string>(256);
-for (let i = 0, j = 0; i < palette.length; ++i) {
-    const r = buffer[j++];
-    const g = buffer[j++];
-    const b = buffer[j++];
-    palette[i] = chroma(r, g, b).lab();
-    htmlColors[i] = ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0').toUpperCase();
-}
 
 const closestColorCache = new Map<number, number>();
-export default function findClosestColorIndex(r: number, g: number, b: number, a: number) {
+
+export function loadHtmlColors(): string[] {
+    const htmlColors = new Array<string>(256);
+    for (let i = 0, j = 0; i < palette.length; ++i) {
+        const r = buffer[j++];
+        const g = buffer[j++];
+        const b = buffer[j++];
+        palette[i] = chroma(r, g, b).lab();
+        htmlColors[i] = ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0').toUpperCase();
+    }
+    return htmlColors;
+}
+
+export function findClosestColorIndex(r: number, g: number, b: number, a: number) {
     const key = (r << 24) | (g << 16) | (b << 8) | a;
     const value = closestColorCache.get(key);
     if (value !== undefined) {
@@ -56,4 +61,3 @@ export default function findClosestColorIndex(r: number, g: number, b: number, a
     closestColorCache.set(key, index);
     return index;
 }
-

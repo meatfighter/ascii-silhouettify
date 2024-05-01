@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import findClosestColorIndex from '@/colors';
+import { findClosestColorIndex } from '@/colors';
 
 export class Image {
     indices: Uint8Array;
