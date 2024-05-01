@@ -1,7 +1,7 @@
 import * as os from 'os';
-import { glyphHeight, glyphMinCount, glyphs, glyphTable, glyphWidth } from '@/glyphs';
-import { Image } from '@/images';
-import { htmlColors } from '@/colors';
+// import { glyphHeight, glyphMinCount, glyphs, glyphMasks, glyphWidth } from '@/glyphs';
+// import { Image } from '@/images';
+// import { htmlColors } from '@/colors';
 
 export class Ascii {
     text: string;
@@ -46,7 +46,7 @@ function toMonochromeAscii(image: Image, offsetX: number, offsetY: number, image
                 for (let x = 0; x < glyphWidth; ++x) {
                     const glyphX = glyphOriginX + glyphScaleX * x;
                     if (image.getIndex(glyphX, glyphY) === 0) {
-                        const row = glyphTable[tableOffset + x];
+                        const row = glyphMasks[tableOffset + x];
                         region[2] &= row[2];
                         region[1] &= row[1];
                         region[0] &= row[0];
@@ -75,21 +75,21 @@ function toMonochromeAscii(image: Image, offsetX: number, offsetY: number, image
     return new Ascii(text, matched);
 }
 
-function toColorAscii(image: Image, offsetX: number, offsetY: number, imageScale: number, scaledGlyphWidth: number,
-                      scaledGlyphHeight: number, html: boolean): Ascii {
+function toColorAscii(/*image: Image, offsetX: number, offsetY: number, imageScale: number, scaledGlyphWidth: number,
+                      scaledGlyphHeight: number, html: boolean*/): Ascii {
 
-    const scaledImageWidth = imageScale * image.width;
-    const scaledImageHeight = imageScale * image.height;
-    const cols = Math.ceil(scaledImageWidth / scaledGlyphWidth);
-    const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
-    const paddedWidth = Math.ceil(cols * scaledGlyphWidth);
-    const paddedHeight = Math.ceil(rows * scaledGlyphHeight);
-    const originX = offsetX + (scaledImageWidth - paddedWidth) / 2;
-    const originY = offsetY + (scaledImageHeight - paddedHeight) / 2;
-    const glyphScaleX = scaledGlyphWidth / (imageScale * glyphWidth);
-    const glyphScaleY = scaledGlyphHeight / (imageScale * glyphHeight);
-    const rowScale = scaledGlyphHeight / imageScale;
-    const colScale = scaledGlyphWidth / imageScale;
+    // const scaledImageWidth = imageScale * image.width;
+    // const scaledImageHeight = imageScale * image.height;
+    // const cols = Math.ceil(scaledImageWidth / scaledGlyphWidth);
+    // const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
+    // const paddedWidth = Math.ceil(cols * scaledGlyphWidth);
+    // const paddedHeight = Math.ceil(rows * scaledGlyphHeight);
+    // const originX = offsetX + (scaledImageWidth - paddedWidth) / 2;
+    // const originY = offsetY + (scaledImageHeight - paddedHeight) / 2;
+    // const glyphScaleX = scaledGlyphWidth / (imageScale * glyphWidth);
+    // const glyphScaleY = scaledGlyphHeight / (imageScale * glyphHeight);
+    // const rowScale = scaledGlyphHeight / imageScale;
+    // const colScale = scaledGlyphWidth / imageScale;
 
     const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
@@ -147,7 +147,7 @@ function toColorAscii(image: Image, offsetX: number, offsetY: number, imageScale
                     for (let x = 0; x < glyphWidth; ++x) {
                         const glyphX = glyphOriginX + glyphScaleX * x;
                         if (image.getIndex(glyphX, glyphY) !== colorIndex) {
-                            const row = glyphTable[tableOffset + x];
+                            const row = glyphMasks[tableOffset + x];
                             region[2] &= row[2];
                             region[1] &= row[1];
                             region[0] &= row[0];
@@ -231,5 +231,6 @@ export function convert(image: Image, color: boolean, imageScale: number, fontSi
             }
         }
     }
+
     return ascii;
 }

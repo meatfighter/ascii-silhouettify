@@ -2,10 +2,9 @@
   "name": "ascii-silouette",
   "version": "1.0.0",
   "type": "module",
-  "module": "./dist/ascii-silouette.es.js",
+  "module": "./dist/main.bundle.js",
   "scripts": {
     "clean": "rimraf ./dist ./bin",
-    "dev": "npx tsx src/main.ts",
     "build": "npm run clean && rollup -c",
     "pack": "npm pack && shx mkdir -p bin && shx mv *.tgz bin/ascii-silouette.tgz",
     "all": "npm run build && npm run pack",
@@ -32,7 +31,7 @@
     "dist"
   ],
   "bin": {
-    "ascii-silouette": "./dist/ascii-silouette.es.js"
+    "ascii-silouette": "./dist/main.bundle.js"
   },
   "dependencies": {
     "chroma-js": "^2.4.2",

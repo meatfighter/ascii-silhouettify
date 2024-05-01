@@ -48,7 +48,7 @@ export class Glyph {
     }
 }
 
-export const glyphTable: number[][] = [];
+export const glyphMasks: number[][] = [];
 export const glyphs = new Array<Glyph>(PRINTABLE_ASCII.length);
 await (async () => {
     const { data, info } = await sharp(GLYPHS_IMAGE_FILENAME).raw().toColourspace('b-w')
@@ -87,9 +87,9 @@ await (async () => {
     // position corresponding to the glyph, the bitwise AND operation excludes the glyph. After repeating that for all
     // pixels in the region, the number of leading zero bits is counted in the value. That number corresponds to the
     // first remaining glyph whose pixels are fully contained within the white/colored pixels of the image.
-    glyphTable.length = glyphWidth * glyphHeight;
-    for (let i = glyphTable.length - 1; i >= 0; --i) {
-        glyphTable[i] = [ 0x7FFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF ];
+    glyphMasks.length = glyphWidth * glyphHeight;
+    for (let i = glyphMasks.length - 1; i >= 0; --i) {
+        glyphMasks[i] = [ 0x7FFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF ];
     }
     for (let i = glyphs.length - 1; i >= 0; --i) {
         const pixels = glyphs[i].pixels;
@@ -100,7 +100,7 @@ await (async () => {
             const tableOffset = glyphWidth * j;
             for (let k = row.length - 1; k >= 0; --k) {
                 if (row[k]) {
-                    glyphTable[tableOffset + k][index] &= mask;
+                    glyphMasks[tableOffset + k][index] &= mask;
                 }
             }
         }

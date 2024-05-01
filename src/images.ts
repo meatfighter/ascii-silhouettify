@@ -24,6 +24,7 @@ export class Image {
 
 export async function loadImage(filename: string): Promise<Image> {
     const image = sharp(filename);
+
     const { data, info } = await image.raw().toBuffer({ resolveWithObject: true });
     const indices = new Uint8Array(info.width * info.height);
     switch (info.channels) {
@@ -48,5 +49,6 @@ export async function loadImage(filename: string): Promise<Image> {
             }
             break;
     }
+
     return new Image(indices, info.width, info.height);
 }

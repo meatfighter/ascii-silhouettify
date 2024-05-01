@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
-// default font size 12
-// default line height 1.2
-
 import { convert } from '@/ascii';
 import { loadImage } from '@/images';
+
+import { Worker } from 'worker_threads';
 
 // function printUsage() {
 //     console.log(
@@ -26,8 +25,12 @@ import { loadImage } from '@/images';
 //   -h, --help             Shows this help message`);
 // }
 
+const worker = new Worker('./dist/ascii-worker.bundle.js');
+
 const ascii = convert(await loadImage('images/reddit.png'), true, 1, 12, 1.2, false);
 
 console.log(ascii.text);
 console.log(ascii.matched);
+
+worker.postMessage('test');
 
