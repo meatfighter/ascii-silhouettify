@@ -1,50 +1,12 @@
-import { parentPort } from 'worker_threads';
-import { Image } from '@/images';
-import { Glyph, GlyphInfo } from '@/glyphs';
 import os from 'os';
-import { Ascii } from '@/ascii';
+import { parentPort } from 'worker_threads';
+import Ascii from '@/ascii';
+import Task from '@/task';
 
-export class Offset {
-    constructor(
-        public x: number,
-        public y: number
-    ) {
-    }
-}
+function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii {
 
-export class Task {
-    constructor(
-        public offsets: Offset[],
-        public image: Image,
-        public glyphInfo: GlyphInfo,
-        public glyphScaleX: number,
-        public glyphScaleY: number,
-        public rows: number,
-        public cols: number,
-        public rowScale: number,
-        public colScale: number,
-        public color: boolean,
-        public html: boolean,
-        public htmlColors: string[]
-    ) {
-    }
-}
-
-function toMonochromeAscii(image: Image, offsetX: number, offsetY: number, imageScale: number, scaledGlyphWidth: number,
-                           scaledGlyphHeight: number, html: boolean): Ascii {
-
-    const scaledImageWidth = imageScale * image.width;
-    const scaledImageHeight = imageScale * image.height;
-    const cols = Math.ceil(scaledImageWidth / scaledGlyphWidth);
-    const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
-    const paddedWidth = Math.ceil(cols * scaledGlyphWidth);
-    const paddedHeight = Math.ceil(rows * scaledGlyphHeight);
-    const originX = offsetX + (scaledImageWidth - paddedWidth) / 2;
-    const originY = offsetY + (scaledImageHeight - paddedHeight) / 2;
-    const glyphScaleX = scaledGlyphWidth / (imageScale * glyphWidth);
-    const glyphScaleY = scaledGlyphHeight / (imageScale * glyphHeight);
-    const rowScale = scaledGlyphHeight / imageScale;
-    const colScale = scaledGlyphWidth / imageScale;
+    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, html } = task;
+    const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
 
     let text = '';
     let matched = 0;
@@ -57,6 +19,9 @@ function toMonochromeAscii(image: Image, offsetX: number, offsetY: number, image
             region[2] = 0x7FFFFFFF;
             region[1] = region[0] = 0xFFFFFFFF;
 
+            // Attempt to substitute the region with a glyph starting with the character containing the most pixels down
+            // to the space character. If any of the glyph's pixels coincide with a black pixel in image region, then
+            // that character is excluded.
             for (let y = 0; y < glyphHeight; ++y) {
                 const glyphY = glyphOriginY + glyphScaleY * y;
                 const tableOffset = glyphWidth * y;
@@ -92,21 +57,10 @@ function toMonochromeAscii(image: Image, offsetX: number, offsetY: number, image
     return new Ascii(text, matched);
 }
 
-function toColorAscii(/*image: Image, offsetX: number, offsetY: number, imageScale: number, scaledGlyphWidth: number,
-                      scaledGlyphHeight: number, html: boolean*/): Ascii {
+function toColorAscii(task: Task, originX: number, originY: number): Ascii {
 
-    // const scaledImageWidth = imageScale * image.width;
-    // const scaledImageHeight = imageScale * image.height;
-    // const cols = Math.ceil(scaledImageWidth / scaledGlyphWidth);
-    // const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
-    // const paddedWidth = Math.ceil(cols * scaledGlyphWidth);
-    // const paddedHeight = Math.ceil(rows * scaledGlyphHeight);
-    // const originX = offsetX + (scaledImageWidth - paddedWidth) / 2;
-    // const originY = offsetY + (scaledImageHeight - paddedHeight) / 2;
-    // const glyphScaleX = scaledGlyphWidth / (imageScale * glyphWidth);
-    // const glyphScaleY = scaledGlyphHeight / (imageScale * glyphHeight);
-    // const rowScale = scaledGlyphHeight / imageScale;
-    // const colScale = scaledGlyphWidth / imageScale;
+    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, html, htmlColors } = task;
+    const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs, minCount: glyphMinCount } = glyphInfo;
 
     const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
@@ -150,7 +104,8 @@ function toColorAscii(/*image: Image, offsetX: number, offsetY: number, imageSca
 
             // For each of the remaining counted color indices, attempt to substitute the region with a colored glyph
             // starting with the character containing the most pixels down to the space character. If any of the
-            // character's pixels do not align with color index, then that character is excluded.
+            // glyph's pixels do not coincide with an image pixel of a specified color index, then that character is
+            // excluded.
             let bestGlyphIndex = 0;
             let bestColorIndex = 0;
             colorIndexCounts.forEach((_, colorIndex) => {
@@ -231,6 +186,17 @@ function toColorAscii(/*image: Image, offsetX: number, offsetY: number, imageSca
     return new Ascii(text, matched);
 }
 
-parentPort!.on('message', msg => {
-    console.log(`worker received message ${msg}`);
+parentPort!.on('message', workerTask => {
+    const task = workerTask as Task;
+    const func = task.color ? toColorAscii : toMonochromeAscii;
+
+    let ascii = new Ascii('', 0);
+    task.offsets.forEach(offset => {
+        const result = func(task, offset.x + task.marginX, offset.y + task.marginY);
+        if (result.matched > ascii.matched) {
+            ascii = result;
+        }
+    });
+
+    parentPort!.postMessage(ascii);
 });

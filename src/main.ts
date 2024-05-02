@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-import { convert } from '@/ascii';
+import os from 'os';
+import { loadHtmlColors } from '@/colors';
+import { loadGlyphs } from '@/glyphs';
 import { loadImage } from '@/images';
-
-import { Worker } from 'worker_threads';
+import convert from '@/ascii-converter';
 
 // function printUsage() {
 //     console.log(
@@ -25,12 +26,10 @@ import { Worker } from 'worker_threads';
 //   -h, --help             Shows this help message`);
 // }
 
-const worker = new Worker('./dist/ascii-worker.bundle.js');
-
-const ascii = convert(await loadImage('images/reddit.png'), true, 1, 12, 1.2, false);
+const htmlColors = loadHtmlColors();
+const glyphInfo = await loadGlyphs();
+const image = await loadImage('images/reddit.png');
+const ascii = await convert(image, glyphInfo, true, 1, 12, 1.2, false, htmlColors, os.cpus().length);
 
 console.log(ascii.text);
 console.log(ascii.matched);
-
-worker.postMessage('test');
-
