@@ -30,9 +30,9 @@ export default [
         ]
     },
     {
-        input: './src/ascii-worker.ts',
+        input: './src/worker.ts',
         output: {
-            file: './dist/ascii-worker.bundle.js',
+            file: './dist/worker.bundle.js',
             format: 'es',
             interop: 'esModule',
         },

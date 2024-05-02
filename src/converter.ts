@@ -38,7 +38,7 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
     let wc = workerCount;
     await new Promise<void>(resolve => {
         for (let i = workerCount - 1; i >= 0; --i) {
-            const worker = new Worker('./dist/ascii-worker.bundle.js');
+            const worker = new Worker('./dist/worker.bundle.js');
             worker.on('message', workerResult => {
                 const result = workerResult as Ascii;
                 if (result.matched > ascii.matched) {

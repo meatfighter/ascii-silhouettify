@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
+import { performance } from 'perf_hooks';
+
 import os from 'os';
 import { loadHtmlColors } from '@/colors';
 import { loadGlyphs } from '@/glyphs';
 import { loadImage } from '@/images';
-import convert from '@/ascii-converter';
+import convert from '@/converter';
 
 // function printUsage() {
 //     console.log(
@@ -26,10 +28,16 @@ import convert from '@/ascii-converter';
 //   -h, --help             Shows this help message`);
 // }
 
+const start = performance.now();
+
 const htmlColors = loadHtmlColors();
 const glyphInfo = await loadGlyphs();
-const image = await loadImage('images/reddit.png');
+const image = await loadImage('images/coca-cola.png');
 const ascii = await convert(image, glyphInfo, true, 1, 12, 1.2, false, htmlColors, os.cpus().length);
 
 console.log(ascii.text);
 console.log(ascii.matched);
+
+const end = performance.now();
+
+console.log(`Execution time: ${end - start} milliseconds`);

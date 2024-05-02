@@ -6,6 +6,7 @@
   "scripts": {
     "clean": "rimraf ./dist ./bin",
     "build": "npm run clean && rollup -c",
+    "run": "node ./dist/main.bundle.js",
     "pack": "npm pack && shx mkdir -p bin && shx mv *.tgz bin/ascii-silouette.tgz",
     "all": "npm run build && npm run pack",
     "install-global": "npm install -g ./bin/ascii-silouette.tgz",

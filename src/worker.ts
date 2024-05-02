@@ -1,5 +1,6 @@
 import os from 'os';
 import { parentPort } from 'worker_threads';
+import { Image } from '@/images';
 import Ascii from '@/ascii';
 import Task from '@/task';
 
@@ -186,8 +187,8 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
     return new Ascii(text, matched);
 }
 
-parentPort!.on('message', workerTask => {
-    const task = workerTask as Task;
+parentPort!.on('message', (task: Task) => {
+    task.image = new Image(task.image.indices, task.image.width, task.image.height);
     const func = task.color ? toColorAscii : toMonochromeAscii;
 
     let ascii = new Ascii('', 0);
