@@ -5,32 +5,137 @@ import { loadHtmlColors } from '@/colors';
 import { loadGlyphs } from '@/glyphs';
 import { loadImage } from '@/images';
 import convert from '@/converter';
+import { extractArgs, ParamType } from '@/args';
+import { checkFileExists } from '@/files';
+import * as console from 'console';
 
 function printUsage() {
-    console.log(
-`Usage: ascii-silhouette [options]
+    console.log(`
+Usage: ascii-silhouette [options]
 
-Required:
+Required Values:
   -i, --input "..."      Input image filename (formats: png, svg, jpg, webp, gif, tif, heif, avif, pdf)
 
-Optional:
+Optional Values:
   -o, --output "..."     Output filename (formats: txt, ans, html) (default: stdout)
-  -w, --web              To generate HTML instead of ASCII or ANSI (default based on output filename extension)
-  -u, --unstyled         To generate unstyled text
   -f, --font-size ...    Terminal or browser font size in points (default: 12)
   -l, --line-height ...  Terminal or browser line height relative to font size (default: 1.2)
   -s, --scale ...        Input image scaling factor (default: 1)
-  -t, --threads ...      Number of threads to use for processing (default: number of CPU cores available)
+  -t, --threads ...      Threads count for processing (default: number of available logical processors)
 
-Other:
+Optional Switches:
+  -w, --web              Generate HTML instead of ASCII or ANSI (default based on output filename extension)
+  -u, --unstyled         Generate unstyled text
+
+Other Operations:
   -v, --version          Shows version number
-  -h, --help             Shows this help message`);
+  -h, --help             Shows this help message
+  `);
 }
 
-const htmlColors = loadHtmlColors();
-const glyphInfo = await loadGlyphs();
-const image = await loadImage('images/coca-cola.png');
-const ascii = await convert(image, glyphInfo, true, 1, 12, 1.2, false, htmlColors, os.cpus().length);
+async function main() {
+    let args: Map<string, string | boolean | number>;
+    try {
+        args = extractArgs([
+            {
+                key: 'input',
+                flags: [ '-i', '--input' ],
+                type: ParamType.STRING,
+            },
+            {
+                key: 'output',
+                flags: [ '-o', '--output' ],
+                type: ParamType.STRING,
+            },
+            {
+                key: 'web',
+                flags: [ '-w', '--web' ],
+                type: ParamType.NONE,
+            },
+            {
+                key: 'unstyled',
+                flags: [ '-u', '--unstyled' ],
+                type: ParamType.NONE,
+            },
+            {
+                key: 'font-size',
+                flags: [ '-f', '--font-size' ],
+                type: ParamType.FLOAT,
+            },
+            {
+                key: 'line-height',
+                flags: [ '-l', '--line-height' ],
+                type: ParamType.FLOAT,
+            },
+            {
+                key: 'scale',
+                flags: [ '-s', '--scale' ],
+                type: ParamType.FLOAT,
+            },
+            {
+                key: 'threads',
+                flags: [ '-t', '--threads' ],
+                type: ParamType.INTEGER,
+            },
+            {
+                key: 'version',
+                flags: [ '-v', '--version' ],
+                type: ParamType.NONE,
+            },
+            {
+                key: 'help',
+                flags: [ '-h', '--help' ],
+                type: ParamType.NONE,
+            },
+        ]);
+    } catch (e) {
+        console.log();
+        console.log((e as Error).message);
+        printUsage();
+        return;
+    }
 
-console.log(ascii.text);
-console.log(ascii.matched);
+    if (args.get('version') as boolean | undefined) {
+        console.log('\n1.0.0\n');
+        return;
+    }
+
+    if (args.get('help') as boolean | undefined) {
+        printUsage();
+        return;
+    }
+
+    const inputFilename = args.get('input') as string | undefined;
+    if (!inputFilename) {
+        printUsage();
+        return;
+    }
+    if (!(await checkFileExists(inputFilename))) {
+        console.log('\nInput file not found.\n');
+        return;
+    }
+
+    const outputFilename = args.get('output') as string | undefined;
+    const html = (args.get('web') as boolean | undefined) || false;
+    const color = !((args.get('unstyled') as boolean | undefined) || false);
+    const fontSize = (args.get('font-size') as number | undefined) || 12;
+    const lineHeight = (args.get('line-height') as number | undefined) || 1.2;
+    const scale = (args.get('scale') as number | undefined) || 1;
+
+    const logicalProcessors = os.cpus().length;
+    const threads = (args.get('threads') as number | undefined) || logicalProcessors;
+    if (threads < 1) {
+        console.log('\nProcessing requires a minimum of one thread.\n');
+        return;
+    } else if (threads > logicalProcessors) {
+        console.log(`\nThread count cannot exceed the number of logical processors (${logicalProcessors}).\n`);
+        return;
+    }
+
+    const htmlColors = loadHtmlColors();
+    const glyphInfo = await loadGlyphs();
+    const image = await loadImage(inputFilename);
+    const ascii = await convert(image, glyphInfo, color, scale, fontSize, lineHeight, html, htmlColors, threads);
+}
+
+await main();
