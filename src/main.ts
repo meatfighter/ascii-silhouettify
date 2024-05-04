@@ -6,8 +6,9 @@ import { loadGlyphs } from '@/glyphs';
 import { loadImage } from '@/images';
 import convert from '@/converter';
 import { extractArgs, ParamType } from '@/args';
-import { checkFileExists } from '@/files';
+import { checkFileExists, ensureDirectoryExists, extractFilenameWithoutExtension, writeTextToFile } from '@/files';
 import * as console from 'console';
+import Ascii from '@/ascii';
 
 function printUsage() {
     console.log(`
@@ -31,6 +32,22 @@ Other Operations:
   -v, --version          Shows version number
   -h, --help             Shows this help message
   `);
+}
+
+async function outputResult(outputFilename: string | undefined, ascii: Ascii) {
+    if (!outputFilename) {
+        console.log(ascii.text);
+        return;
+    }
+
+    if (!(await ensureDirectoryExists(outputFilename))) {
+        console.log('\nFailed to create output directory.\n');
+        return;
+    }
+
+    if (!(await writeTextToFile(outputFilename, ascii.text))) {
+        console.log('\nFailed to create output file.\n');
+    }
 }
 
 async function main() {
@@ -116,11 +133,28 @@ async function main() {
     }
 
     const outputFilename = args.get('output') as string | undefined;
-    const html = (args.get('web') as boolean | undefined) || false;
+    const lc = outputFilename ? outputFilename.toLowerCase() : undefined;
+    const html = (args.get('web') as boolean | undefined) || (lc && (lc.endsWith('.html') || lc.endsWith('.htm')))
+            || false;
     const color = !((args.get('unstyled') as boolean | undefined) || false);
+
     const fontSize = (args.get('font-size') as number | undefined) || 12;
+    if (fontSize <= 0) {
+        console.log('\nFont size must be >= 0.\n');
+        return;
+    }
+
     const lineHeight = (args.get('line-height') as number | undefined) || 1.2;
+    if (lineHeight <= 0) {
+        console.log('\nLine height must be >= 0.\n');
+        return;
+    }
+
     const scale = (args.get('scale') as number | undefined) || 1;
+    if (scale <= 0) {
+        console.log('\nScale must be >= 0.\n');
+        return;
+    }
 
     const logicalProcessors = os.cpus().length;
     const threads = (args.get('threads') as number | undefined) || logicalProcessors;
@@ -134,8 +168,16 @@ async function main() {
 
     const htmlColors = loadHtmlColors();
     const glyphInfo = await loadGlyphs();
-    const image = await loadImage(inputFilename);
-    const ascii = await convert(image, glyphInfo, color, scale, fontSize, lineHeight, html, htmlColors, threads);
+    let image;
+    try {
+        image = await loadImage(inputFilename);
+    } catch {
+        console.log('\nFailed to load input image file.\n');
+        return;
+    }
+    const title = extractFilenameWithoutExtension(inputFilename);
+    const ascii = await convert(image, glyphInfo, color, scale, fontSize, lineHeight, html, htmlColors, title, threads);
+    void await outputResult(outputFilename, ascii);
 }
 
-await main();
+void await main();

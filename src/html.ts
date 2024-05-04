@@ -1,4 +1,4 @@
-function getHtmlHeader(title: string, fontSize: number, lineHeight: number) {
+export function getHtmlHeader(title: string, fontSize: number, lineHeight: number) {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +29,7 @@ function getHtmlHeader(title: string, fontSize: number, lineHeight: number) {
     <pre>`;
 }
 
-function getHtmlFooter() {
+export function getHtmlFooter() {
     return `    </pre>
 </body>
 </html>`;

@@ -5,10 +5,11 @@ import { GlyphInfo } from '@/glyphs';
 import Ascii from '@/ascii';
 import Offset from '@/offset';
 import Task from '@/task';
+import { getHtmlFooter, getHtmlHeader } from '@/html';
 
 export default async function convert(image: Image, glyphInfo: GlyphInfo, color: boolean, imageScale: number,
                                       fontSize: number, lineHeight: number, html: boolean, htmlColors: string[],
-                                      workerCount: number): Promise<Ascii> {
+                                      title: string, workerCount: number): Promise<Ascii> {
 
     const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
     const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
@@ -52,6 +53,10 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
                 colScale, marginX, marginY, color, html, htmlColors));
         }
     });
+
+    if (html) {
+        ascii.text = `${getHtmlHeader(title, fontSize, lineHeight)}${ascii.text}${getHtmlFooter()}`;
+    }
 
     return ascii;
 }
