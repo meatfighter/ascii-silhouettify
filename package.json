@@ -17,8 +17,9 @@
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@types/node": "^20.12.2",
     "@types/chroma-js": "^2.4.4",
+    "@types/glob": "^8.1.0",
+    "@types/node": "^20.12.2",
     "@types/sharp": "^0.32.0",
     "rimraf": "^5.0.5",
     "rollup": "^4.13.0",
@@ -36,6 +37,7 @@
   },
   "dependencies": {
     "chroma-js": "^2.4.2",
+    "glob": "^10.3.12",
     "sharp": "^0.33.3"
   }
 }

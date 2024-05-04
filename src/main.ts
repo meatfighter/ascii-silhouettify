@@ -6,37 +6,45 @@ import { loadGlyphs } from '@/glyphs';
 import { loadImage } from '@/images';
 import convert from '@/converter';
 import { extractArgs, ParamType } from '@/args';
-import { checkFileExists, ensureDirectoryExists, extractFilenameWithoutExtension, writeTextToFile } from '@/files';
+import { ensureDirectoryExists, extractFilenameWithoutExtension, writeTextToFile } from '@/files';
 import * as console from 'console';
-import Ascii from '@/ascii';
+import { getHtmlFooter, getHtmlHeader } from '@/html';
 
 function printUsage() {
     console.log(`
 Usage: ascii-silhouette [options]
 
 Required Values:
-  -i, --input "..."      Input image filename (formats: png, svg, jpg, webp, gif, tif, heif, avif, pdf)
+  -i, --input "..." ["..."]  Input image filename(s) 
+                             Supported formats: png, svg, jpg, webp, gif, tif, heif, avif, pdf
+                             Supported filename pattern-matching rules:
+                               *       Zero or more characters (e.g. *.png)
+                               **/     Zero or more directories (e.g. **/*.png)
+                               ?       Exactly one character at the specified position (e.g. example-?.png)
+                               [...]   Any single character (e.g. [a-z].png)
+                               [!...]  Not any single character (e.g. [!a-z].png)
+                               {a,b}   Any of the comma-separated patterns (e.g. {example-*,test-*}.{png,jpg,gif})                             
 
 Optional Values:
-  -o, --output "..."     Output filename (formats: txt, ans, html) (default: stdout)
-  -f, --font-size ...    Terminal or browser font size in points (default: 12)
-  -l, --line-height ...  Terminal or browser line height relative to font size (default: 1.2)
-  -s, --scale ...        Input image scaling factor (default: 1)
-  -t, --threads ...      Threads count for processing (default: number of available logical processors)
+  -o, --output "..."         Output filename (supported formats: txt, ans, html) (default: stdout)
+  -f, --font-size ...        Terminal or browser font size in points (default: 12)
+  -l, --line-height ...      Terminal or browser line height relative to font size (default: 1.2)
+  -s, --scale ...            Input image scaling factor (default: 1)
+  -t, --threads ...          Threads count for processing (default: number of available logical processors)
 
 Optional Switches:
-  -w, --web              Generate HTML instead of ASCII or ANSI (default based on output filename extension)
-  -u, --unstyled         Generate unstyled text
+  -w, --web                  Generate HTML instead of ASCII or ANSI (default based on output filename extension)
+  -u, --unstyled             Generate unstyled text
 
 Other Operations:
-  -v, --version          Shows version number
-  -h, --help             Shows this help message
+  -v, --version              Shows version number
+  -h, --help                 Shows this help message
   `);
 }
 
-async function outputResult(outputFilename: string | undefined, ascii: Ascii) {
+async function outputResult(outputFilename: string | undefined, result: string) {
     if (!outputFilename) {
-        console.log(ascii.text);
+        console.log(result);
         return;
     }
 
@@ -45,19 +53,19 @@ async function outputResult(outputFilename: string | undefined, ascii: Ascii) {
         return;
     }
 
-    if (!(await writeTextToFile(outputFilename, ascii.text))) {
+    if (!(await writeTextToFile(outputFilename, result))) {
         console.log('\nFailed to create output file.\n');
     }
 }
 
 async function main() {
-    let args: Map<string, string | boolean | number>;
+    let args: Map<string, string | boolean | number | string[]>;
     try {
         args = extractArgs([
             {
                 key: 'input',
                 flags: [ '-i', '--input' ],
-                type: ParamType.STRING,
+                type: ParamType.FILENAMES,
             },
             {
                 key: 'output',
@@ -122,15 +130,12 @@ async function main() {
         return;
     }
 
-    const inputFilename = args.get('input') as string | undefined;
-    if (!inputFilename) {
+    const inputFilenames = args.get('input') as string[] | undefined;
+    if (!inputFilenames || inputFilenames.length === 0) {
         printUsage();
         return;
     }
-    if (!(await checkFileExists(inputFilename))) {
-        console.log('\nInput file not found.\n');
-        return;
-    }
+    const title = extractFilenameWithoutExtension(inputFilenames[0]);
 
     const outputFilename = args.get('output') as string | undefined;
     const lc = outputFilename ? outputFilename.toLowerCase() : undefined;
@@ -168,16 +173,29 @@ async function main() {
 
     const htmlColors = loadHtmlColors();
     const glyphInfo = await loadGlyphs();
-    let image;
-    try {
-        image = await loadImage(inputFilename);
-    } catch {
-        console.log('\nFailed to load input image file.\n');
-        return;
+
+    let result: string = '';
+    if (html) {
+        result += getHtmlHeader(title, fontSize, lineHeight);
     }
-    const title = extractFilenameWithoutExtension(inputFilename);
-    const ascii = await convert(image, glyphInfo, color, scale, fontSize, lineHeight, html, htmlColors, title, threads);
-    void await outputResult(outputFilename, ascii);
+
+    for (let i = 0; i < inputFilenames.length; ++i) {
+        let image;
+        try {
+            image = await loadImage(inputFilenames[i]);
+        } catch {
+            console.log(`\nFailed to load input image file: ${inputFilenames[i]}\n`);
+            return;
+        }
+        const ascii = await convert(image, glyphInfo, color, scale, fontSize, lineHeight, html, htmlColors, threads);
+        result += ascii.text;
+    }
+
+    if (html) {
+        result += getHtmlFooter();
+    }
+
+    void await outputResult(outputFilename, result);
 }
 
 void await main();

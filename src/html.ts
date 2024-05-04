@@ -10,27 +10,23 @@ export function getHtmlHeader(title: string, fontSize: number, lineHeight: numbe
     <title>${title}</title>   
     <style>
       html, body {
-        height: 100%;
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
         background: #0C0C0C;
+        color: #CCCCCC;
+        text-align: center;
       }
       pre {
         font-family: 'Cascadia Code', sans-serif;
         font-size: ${fontSize}pt; 
         line-height: ${lineHeight};
-      }
-    </style>
+      }        
+    </style>    
 </head>
 <body>
     <pre>`;
 }
 
 export function getHtmlFooter() {
-    return `    </pre>
+    return `    </pre>   
 </body>
 </html>`;
 }
