@@ -8,7 +8,7 @@ import Task from '@/task';
 
 export default async function convert(image: Image, glyphInfo: GlyphInfo, color: boolean, imageScale: number,
                                       fontSize: number, lineHeight: number, html: boolean, htmlColors: string[],
-                                      workerCount: number): Promise<Ascii> {
+                                      workers: Worker[]): Promise<Ascii> {
 
     const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
     const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
@@ -32,22 +32,23 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
             offsets.push(new Offset(x, y));
         }
     }
-    const offs = partitionArray(offsets, workerCount);
+    const offs = partitionArray(offsets, workers.length);
 
     let ascii = new Ascii('', 0);
-    let wc = workerCount;
+    let wc = workers.length;
     await new Promise<void>(resolve => {
-        for (let i = workerCount - 1; i >= 0; --i) {
-            const worker = new Worker('./dist/worker.bundle.js');
-            worker.on('message', (result: Ascii) => {
+        for (let i = workers.length - 1; i >= 0; --i) {
+            const worker = workers[i];
+            function messageHandler(result: Ascii) {
+                worker.removeListener('message', messageHandler);
                 if (result.matched > ascii.matched) {
                     ascii = result;
                 }
                 if (--wc === 0) {
                     resolve();
                 }
-                void worker.terminate();
-            });
+            }
+            worker.addListener('message', messageHandler);
             worker.postMessage(new Task(offs[i], image, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale,
                 colScale, marginX, marginY, color, html, htmlColors));
         }

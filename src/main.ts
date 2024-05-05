@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import os from 'os';
+import { Worker } from 'worker_threads';
 import { loadHtmlColors } from '@/colors';
 import { loadGlyphs } from '@/glyphs';
 import { loadImage } from '@/images';
@@ -183,6 +184,11 @@ async function main() {
         result += getHtmlHeader(title, fontSize, lineHeight);
     }
 
+    const workers = new Array<Worker>(threads);
+    for (let i = threads - 1; i >= 0; --i) {
+        workers[i] = new Worker('./dist/worker.bundle.js');
+    }
+
     for (let i = 0; i < inputFilenames.length; ++i) {
         let image;
         try {
@@ -191,12 +197,16 @@ async function main() {
             console.log(`\nFailed to load input image file: ${inputFilenames[i]}\n`);
             return;
         }
-        const ascii = await convert(image, glyphInfo, color, scale, fontSize, lineHeight, html, htmlColors, threads);
+        const ascii = await convert(image, glyphInfo, color, scale, fontSize, lineHeight, html, htmlColors, workers);
         result += ascii.text;
     }
 
     if (html) {
         result += getHtmlFooter();
+    }
+
+    for (let i = threads - 1; i >= 0; --i) {
+        void workers[i].terminate();
     }
 
     void await outputResult(outputFilename, result);
