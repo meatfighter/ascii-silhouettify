@@ -131,8 +131,12 @@ async function main() {
     }
 
     const inputFilenames = args.get('input') as string[] | undefined;
-    if (!inputFilenames || inputFilenames.length === 0) {
+    if (!inputFilenames) {
         printUsage();
+        return;
+    }
+    if (inputFilenames.length === 0) {
+        console.log('\nInput image files not found.\n');
         return;
     }
     const title = extractFilenameWithoutExtension(inputFilenames[0]);
