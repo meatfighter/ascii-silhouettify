@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
+// TODO NEOFETCH ASNI FORMAT???
+
 import os from 'os';
 import { Worker } from 'worker_threads';
-import { loadHtmlColors } from '@/colors';
+import { loadHtmlColors, Palette } from '@/colors';
 import { loadGlyphs } from '@/glyphs';
 import { loadImage } from '@/images';
 import convert from '@/converter';
@@ -19,23 +21,34 @@ Required Values:
   -i, --input "..." ["..."]  Input image filename(s) 
                              Supported formats: png, svg, jpg, webp, gif, tif, heif, avif, pdf
                              Supported filename pattern-matching rules:
-                               *       Zero or more characters (e.g. *.png)
-                               **/     Zero or more directories (e.g. **/*.png)
-                               ?       Exactly one character at the specified position (e.g. example-?.png)
-                               [...]   Any single character (e.g. [a-z].png)
-                               [!...]  Not any single character (e.g. [!a-z].png)
-                               {a,b}   Any of the comma-separated patterns (e.g. {example-*,test-*}.{png,jpg,gif})                             
+                               *         Zero or more characters (e.g. *.png)
+                               **/       Zero or more directories (e.g. **/*.png)
+                               ?         Exactly one character at the specified position (e.g. example-?.png)
+                               [...]     Any single character (e.g. [a-z].png)
+                               [!...]    Not any single character (e.g. [!a-z].png)
+                               {a,b}     Any of the comma-separated patterns (e.g. {example-*,test-*}.{png,jpg,gif})                             
 
 Optional Values:
-  -o, --output "..."         Output filename (supported formats: txt, ans, html) (default: stdout)
+  -o, --output "..."         Output filename (default: stdout)
+  -e, --encoding ...         Output file format:
+                               text      Plain text or ANSI-colored text (default when file extension is not .html)    
+                               html      Monospaced text in HTML format
+                               neofetch  Neofetch's custom ASCII art format, which is limited to 6 colors of the 
+                                         standard 16-color ANSI palette
+  -p, --palette ...          Restricted color set:
+                               8         First 8 colors of the standard ANSI palette
+                               16        Full 16-color standard ANSI palette
+                               240       240 colors of the 256-color extended ANSI palette, excluding the standard 
+                                         16-color ANSI palette, which is commonly redefined (default) 
+                               256       Full 256-color extended ANSI palette
+  -c, --colors ...           Maximum number of colors (range: 2--256) (default: 256)                             
   -f, --font-size ...        Terminal or browser font size in points (default: 12)
   -l, --line-height ...      Terminal or browser line height relative to font size (default: 1.2)
   -s, --scale ...            Input image scaling factor (default: 1)
   -t, --threads ...          Threads count for processing (default: number of available logical processors)
 
 Optional Switches:
-  -w, --web                  Generate HTML instead of ASCII or ANSI (default based on output filename extension)
-  -u, --unstyled             Generate unstyled text
+  -u, --uncolored            Generate plain, unstyled text
 
 Other Operations:
   -v, --version              Shows version number
@@ -74,14 +87,19 @@ async function main() {
                 type: ParamType.STRING,
             },
             {
-                key: 'web',
-                flags: [ '-w', '--web' ],
-                type: ParamType.NONE,
+                key: 'encoding',
+                flags: [ '-e', '--encoding' ],
+                type: ParamType.STRING,
             },
             {
-                key: 'unstyled',
-                flags: [ '-u', '--unstyled' ],
-                type: ParamType.NONE,
+                key: 'palette',
+                flags: [ '-p', '--palette' ],
+                type: ParamType.INTEGER,
+            },
+            {
+                key: 'colors',
+                flags: [ '-c', '--colors' ],
+                type: ParamType.INTEGER,
             },
             {
                 key: 'font-size',
@@ -102,6 +120,16 @@ async function main() {
                 key: 'threads',
                 flags: [ '-t', '--threads' ],
                 type: ParamType.INTEGER,
+            },
+            {
+                key: 'web',
+                flags: [ '-w', '--web' ],
+                type: ParamType.NONE,
+            },
+            {
+                key: 'uncolored',
+                flags: [ '-u', '--uncolored' ],
+                type: ParamType.NONE,
             },
             {
                 key: 'version',
@@ -146,7 +174,32 @@ async function main() {
     const lc = outputFilename ? outputFilename.toLowerCase() : undefined;
     const html = (args.get('web') as boolean | undefined) || (lc && (lc.endsWith('.html') || lc.endsWith('.htm')))
             || false;
-    const color = !((args.get('unstyled') as boolean | undefined) || false);
+    const colored = !((args.get('uncolored') as boolean | undefined) || false);
+
+    let palette: Palette;
+    switch ((args.get('palette') as number | undefined) || 240) {
+        case 8:
+            palette = Palette.STANDARD_8;
+            break;
+        case 16:
+            palette = Palette.STANDARD_16;
+            break;
+        case 240:
+            palette = Palette.EXTENDED_240;
+            break;
+        case 256:
+            palette = Palette.EXTENDED_256;
+            break;
+        default:
+            console.log('\nPalette must be either 8, 16, 240, or 256.\n');
+            return;
+    }
+
+    const colors = (args.get('colors') as number | undefined) || 256;
+    if (colors < 2 || colors > 256) {
+        console.log('\nColors is restricted to 2--256.\n');
+        return;
+    }
 
     const fontSize = (args.get('font-size') as number | undefined) || 12;
     if (fontSize <= 0) {
@@ -192,12 +245,13 @@ async function main() {
     for (let i = 0; i < inputFilenames.length; ++i) {
         let image;
         try {
-            image = await loadImage(inputFilenames[i]);
+            image = await loadImage(inputFilenames[i], palette, colors);
         } catch {
             console.log(`\nFailed to load input image file: ${inputFilenames[i]}\n`);
             return;
         }
-        const ascii = await convert(image, glyphInfo, color, scale, fontSize, lineHeight, html, htmlColors, workers);
+        const ascii = await convert(image, glyphInfo, colored, scale, fontSize, lineHeight, html, htmlColors,
+            workers);
         result += ascii.text;
     }
 
