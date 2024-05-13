@@ -56,7 +56,7 @@ export async function loadImage(filename: string, pal: Palette, colors: number):
     clearClosestColorCache();
 
     outer: {
-        for (let i = frequencies.length - 1, c = 0; i >= 0; --i) {
+        for (let i = frequencies.length - 1, c = 0; i >= 1; --i) {
             if (frequencies[i] > 0 && ++c > colors) {
                 break outer;
             }
@@ -68,7 +68,7 @@ export async function loadImage(filename: string, pal: Palette, colors: number):
     while (set.length < colors) {
         let maxIndex = 0;
         let maxFrequency = 0;
-        for (let i = frequencies.length - 1; i >= 0; --i) {
+        for (let i = frequencies.length - 1; i >= 1; --i) {
             if (frequencies[i] > maxFrequency) {
                 maxIndex = i;
                 maxFrequency = frequencies[i];

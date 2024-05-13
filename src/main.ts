@@ -30,8 +30,8 @@ Required Values:
 
 Optional Values:
   -o, --output "..."         Output filename (default: stdout)
-  -e, --encoding ...         Output file format:
-                               text      Plain text or ANSI-colored text (default when file extension is not .html)    
+  -e, --encoding ...         Output format:
+                               text      Plain or ANSI-colored text (default when file extension is not .html)    
                                html      Monospaced text in HTML format
                                neofetch  Neofetch's custom ASCII art format, which is limited to 6 colors of the 
                                          standard 16-color ANSI palette
@@ -41,7 +41,7 @@ Optional Values:
                                240       240 colors of the 256-color extended ANSI palette, excluding the standard 
                                          16-color ANSI palette, which is commonly redefined (default) 
                                256       Full 256-color extended ANSI palette
-  -c, --colors ...           Maximum number of colors (range: 2--256) (default: 256)                             
+  -c, --colors ...           Maximum number of colors (range: 1--255) (default: 255)                             
   -f, --font-size ...        Terminal or browser font size in points (default: 12)
   -l, --line-height ...      Terminal or browser line height relative to font size (default: 1.2)
   -s, --scale ...            Input image scaling factor (default: 1)
@@ -195,9 +195,9 @@ async function main() {
             return;
     }
 
-    const colors = (args.get('colors') as number | undefined) || 256;
-    if (colors < 2 || colors > 256) {
-        console.log('\nColors is restricted to 2--256.\n');
+    const colors = (args.get('colors') as number | undefined) || 255;
+    if (colors < 1 || colors > 255) {
+        console.log('\nColors is restricted to 1--255.\n');
         return;
     }
 
