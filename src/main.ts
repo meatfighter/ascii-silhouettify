@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-// TODO NEOFETCH ASNI FORMAT???
-
 import os from 'os';
 import { Worker } from 'worker_threads';
 import { loadHtmlColors, Palette } from '@/colors';
