@@ -8,7 +8,6 @@ import { loadImage } from '@/images';
 import convert from '@/converter';
 import { extractArgs, ParamType } from '@/args';
 import { ensureDirectoryExists, extractFilenameWithoutExtension, writeTextToFile } from '@/files';
-import * as console from 'console';
 import { getHtmlFooter, getHtmlHeader } from '@/html';
 import { Encoding } from '@/encoding';
 
