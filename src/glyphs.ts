@@ -7,6 +7,7 @@ const PRINTABLE_ASCII
 
 class GlyphImage {
     htmlEscapedCharacter: string;
+    neofetchEscapedCharacter: string;
     count: number;
 
     constructor(public character: string,
@@ -38,13 +39,15 @@ class GlyphImage {
             case '"':
                 this.htmlEscapedCharacter = '&quot;';
                 break;
-            case "'":
+            case '\'':
                 this.htmlEscapedCharacter = '&apos;';
                 break;
             default:
                 this.htmlEscapedCharacter = character;
                 break;
         }
+
+        this.neofetchEscapedCharacter = (character === '\\') ? '\\\\' : character;
     }
 }
 

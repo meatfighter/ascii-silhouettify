@@ -22,7 +22,7 @@ export class Image {
     }
 }
 
-export async function loadImage(filename: string, pal: Palette, colors: number): Promise<Image> {
+export async function loadImage(filename: string, pal: Palette, colors: number, darkness: number): Promise<Image> {
 
     const { data, info } = await sharp(filename).raw().toBuffer({ resolveWithObject: true });
 
@@ -34,22 +34,24 @@ export async function loadImage(filename: string, pal: Palette, colors: number):
     switch (info.channels) {
         case 1:
             for (let i = 0; i < indices.length; ++i) {
-                ++frequencies[indices[i] = findClosestColorIndex(pal, data[i], data[i], data[i], 0xFF)];
+                ++frequencies[indices[i] = findClosestColorIndex(pal, darkness, data[i], data[i], data[i], 0xFF)];
             }
             break;
         case 2:
             for (let i = 0, j = 0; i < indices.length; ++i) {
-                ++frequencies[indices[i] = findClosestColorIndex(pal, data[j], data[j], data[j++], data[j++])];
+                ++frequencies[indices[i] = findClosestColorIndex(pal, darkness, data[j], data[j], data[j++],
+                        data[j++])];
             }
             break;
         case 3:
             for (let i = 0, j = 0; i < indices.length; ++i) {
-                ++frequencies[indices[i] = findClosestColorIndex(pal, data[j++], data[j++], data[j++], 0xFF)];
+                ++frequencies[indices[i] = findClosestColorIndex(pal, darkness, data[j++], data[j++], data[j++], 0xFF)];
             }
             break;
         case 4:
             for (let i = 0, j = 0; i < indices.length; ++i) {
-                ++frequencies[indices[i] = findClosestColorIndex(pal, data[j++], data[j++], data[j++], data[j++])];
+                ++frequencies[indices[i] = findClosestColorIndex(pal, darkness, data[j++], data[j++], data[j++],
+                        data[j++])];
             }
             break;
     }
@@ -81,22 +83,22 @@ export async function loadImage(filename: string, pal: Palette, colors: number):
     switch (info.channels) {
         case 1:
             for (let i = 0; i < indices.length; ++i) {
-                indices[i] = findClosestColorIndexAmong(set, data[i], data[i], data[i], 0xFF);
+                indices[i] = findClosestColorIndexAmong(set, darkness, data[i], data[i], data[i], 0xFF);
             }
             break;
         case 2:
             for (let i = 0, j = 0; i < indices.length; ++i) {
-                indices[i] = findClosestColorIndexAmong(set, data[j], data[j], data[j++], data[j++]);
+                indices[i] = findClosestColorIndexAmong(set, darkness, data[j], data[j], data[j++], data[j++]);
             }
             break;
         case 3:
             for (let i = 0, j = 0; i < indices.length; ++i) {
-                indices[i] = findClosestColorIndexAmong(set, data[j++], data[j++], data[j++], 0xFF);
+                indices[i] = findClosestColorIndexAmong(set, darkness, data[j++], data[j++], data[j++], 0xFF);
             }
             break;
         case 4:
             for (let i = 0, j = 0; i < indices.length; ++i) {
-                indices[i] = findClosestColorIndexAmong(set, data[j++], data[j++], data[j++], data[j++]);
+                indices[i] = findClosestColorIndexAmong(set, darkness, data[j++], data[j++], data[j++], data[j++]);
             }
             break;
     }

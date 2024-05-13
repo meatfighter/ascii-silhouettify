@@ -1,7 +1,5 @@
 import chroma from 'chroma-js';
 
-const BLACK_LUMINANCE = 10;
-
 const RGBS = 'DAwMxQ8fE6EOwZwAADfaiBeYOpbdzMzMdnZ250hWFsYM+fGlO3j/tACeYdbW8vLyAAAAAABfAACHAACvAADXAAD/AF8AAF9fAF+HAF+' +
     'vAF/XAF//AIcAAIdfAIeHAIevAIfXAIf/AK8AAK9fAK+HAK+vAK/XAK//ANcAANdfANeHANevANfXANf/AP8AAP9fAP+HAP+vAP/XAP//XwAAXwB' +
     'fXwCHXwCvXwDXXwD/X18AX19fX1+HX1+vX1/XX1//X4cAX4dfX4eHX4evX4fXX4f/X68AX69fX6+HX6+vX6/XX6//X9cAX9dfX9eHX9evX9fXX9f' +
@@ -42,7 +40,9 @@ export function clearClosestColorCache() {
     closestColorCache.clear();
 }
 
-export function findClosestColorIndexAmong(indices: number[], r: number, g: number, b: number, a: number) {
+export function findClosestColorIndexAmong(indices: number[], darkness: number,
+                                           r: number, g: number, b: number, a: number) {
+
     const key = (r << 24) | (g << 16) | (b << 8) | a;
     const value = closestColorCache.get(key);
     if (value !== undefined) {
@@ -52,7 +52,7 @@ export function findClosestColorIndexAmong(indices: number[], r: number, g: numb
     let index = 0;
     const c = chroma(r, g, b).lab();
     c[0] *= a / 255;
-    if (c[0] >= BLACK_LUMINANCE) {
+    if (c[0] >= darkness) {
         let error = Number.MAX_VALUE;
         for (let i = indices.length - 1; i >= 0; --i) {
             const p = palette[indices[i]];
@@ -71,7 +71,9 @@ export function findClosestColorIndexAmong(indices: number[], r: number, g: numb
     return index;
 }
 
-export function findClosestColorIndex(pal: Palette, r: number, g: number, b: number, a: number) {
+export function findClosestColorIndex(pal: Palette, darkness: number,
+                                      r: number, g: number, b: number, a: number) {
+
     const key = (r << 24) | (g << 16) | (b << 8) | a;
     const value = closestColorCache.get(key);
     if (value !== undefined) {
@@ -81,7 +83,7 @@ export function findClosestColorIndex(pal: Palette, r: number, g: number, b: num
     let index = 0;
     const c = chroma(r, g, b).lab();
     c[0] *= a / 255;
-    if (c[0] >= BLACK_LUMINANCE) {
+    if (c[0] >= darkness) {
         let error = Number.MAX_VALUE;
 
         let i: number;

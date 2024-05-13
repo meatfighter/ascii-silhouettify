@@ -45,6 +45,7 @@ Optional Values:
   -f, --font-size ...        Terminal or browser font size in points (default: 12)
   -l, --line-height ...      Terminal or browser line height relative to font size (default: 1.2)
   -s, --scale ...            Input image scaling factor (default: 1)
+  -d, --darkness ...         Regions darker than this brightness level translate to blank spaces (0--100) (default: 10)
   -t, --threads ...          Threads count for processing (default: number of available logical processors)
 
 Optional Switches:
@@ -114,6 +115,11 @@ async function main() {
             {
                 key: 'scale',
                 flags: [ '-s', '--scale' ],
+                type: ParamType.FLOAT,
+            },
+            {
+                key: 'darkness',
+                flags: [ '-d', '--darkness' ],
                 type: ParamType.FLOAT,
             },
             {
@@ -219,6 +225,12 @@ async function main() {
         return;
     }
 
+    const darkness = (args.get('darkness') as number | undefined) || 10;
+    if (darkness < 0 || darkness > 100) {
+        console.log('\nDarkness is restricted to 0--100.\n');
+        return;
+    }
+
     const logicalProcessors = os.cpus().length;
     const threads = (args.get('threads') as number | undefined) || logicalProcessors;
     if (threads < 1) {
@@ -245,7 +257,7 @@ async function main() {
     for (let i = 0; i < inputFilenames.length; ++i) {
         let image;
         try {
-            image = await loadImage(inputFilenames[i], palette, colors);
+            image = await loadImage(inputFilenames[i], palette, colors, darkness);
         } catch {
             console.log(`\nFailed to load input image file: ${inputFilenames[i]}\n`);
             return;
