@@ -3,10 +3,12 @@ import { parentPort } from 'worker_threads';
 import { Image } from '@/images';
 import Ascii from '@/ascii';
 import Task from '@/task';
+import { Encoding } from '@/encoding';
+import { Palette } from '@/colors';
 
 function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii {
 
-    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, html } = task;
+    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, encoding } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
 
     let text = '';
@@ -47,7 +49,17 @@ function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii 
             }
 
             // Append the printable ASCII character.
-            text += html ? glyphs[glyphIndex].htmlEscapedCharacter : glyphs[glyphIndex].character;
+            switch (encoding) {
+                case Encoding.HTML:
+                    text += glyphs[glyphIndex].htmlEscapedCharacter;
+                    break;
+                case Encoding.NEOFETCH:
+                    text += glyphs[glyphIndex].neofetchEscapedCharacter;
+                    break;
+                default:
+                    text += glyphs[glyphIndex].character;
+                    break;
+            }
 
             // Tally the number of glyph pixels that align with image pixels.
             matched += glyphs[glyphIndex].count;
@@ -60,12 +72,14 @@ function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii 
 
 function toColorAscii(task: Task, originX: number, originY: number): Ascii {
 
-    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, html, htmlColors } = task;
+    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, encoding, palette, htmlColors }
+            = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs, minCount: glyphMinCount } = glyphInfo;
 
     const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
-    let text = '';
+    const ansi16 = palette === Palette.STANDARD_8 || palette === Palette.STANDARD_16;
+    let text = (encoding === Encoding.NEOFETCH) ? image.neofetchHeader : '';
     let notFirstSpan = false;
     let lastColorIndex = -1;
     let matched = 0;
@@ -154,20 +168,45 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
             // If the color is different from the previous one, then append the ANSI escape code to set the foreground
             // color to an index of the 256-color palette.
             if (lastColorIndex !== bestColorIndex) {
-                if (html) {
-                    if (notFirstSpan) {
-                        text += "</span>";
-                    }
-                    text += `<span style="color: #${htmlColors[bestColorIndex]};">`;
-                    notFirstSpan = true;
-                } else {
-                    text += `\x1b[38;5;${bestColorIndex}m`;
+                switch (encoding) {
+                    case Encoding.HTML:
+                        if (notFirstSpan) {
+                            text += "</span>";
+                        }
+                        text += `<span style="color: #${htmlColors[bestColorIndex]};">`;
+                        notFirstSpan = true;
+                        break;
+                    case Encoding.NEOFETCH:
+                        text += image.neofetchStyles[bestColorIndex];
+                        break;
+                    default:
+                        if (ansi16) {
+                            if (bestColorIndex < 8) {
+                                text += `\x1b[3${bestColorIndex}m`;
+                            } else {
+                                text += `\x1b[1;3${bestColorIndex - 8}m`;
+                            }
+                        } else {
+                            text += `\x1b[38;5;${bestColorIndex}m`;
+                        }
+                        break;
                 }
+
                 lastColorIndex = bestColorIndex;
             }
 
             // Append the printable ASCII character.
-            text += html ? glyphs[bestGlyphIndex].htmlEscapedCharacter : glyphs[bestGlyphIndex].character;
+            switch (encoding) {
+                case Encoding.HTML:
+                    text += glyphs[bestGlyphIndex].htmlEscapedCharacter;
+                    break;
+                case Encoding.NEOFETCH:
+                    text += glyphs[bestGlyphIndex].neofetchEscapedCharacter;
+                    break;
+                default:
+                    text += glyphs[bestGlyphIndex].character;
+                    break;
+            }
 
             // Tally the number of glyph pixels that align with image pixels.
             matched += glyphs[bestGlyphIndex].count;
@@ -175,20 +214,24 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
         text += os.EOL;
     }
 
-    if (html) {
-        if (notFirstSpan) {
-            text += "</span>";
-        }
-    } else {
-        // Append ANSI escape code to reset the text formatting to the terminal's default settings.
-        text += '\x1b[0m';
+    switch (encoding) {
+        case Encoding.TEXT:
+            // Append ANSI escape code to reset the text formatting to the terminal's default settings.
+            text += '\x1b[0m';
+            break;
+        case Encoding.HTML:
+            if (notFirstSpan) {
+                text += "</span>";
+            }
+            break;
     }
 
     return new Ascii(text, matched);
 }
 
 parentPort!.on('message', (task: Task) => {
-    task.image = new Image(task.image.indices, task.image.width, task.image.height);
+    task.image = new Image(task.image.indices, task.image.width, task.image.height, task.image.neofetchHeader,
+            task.image.neofetchStyles);
     const func = task.color ? toColorAscii : toMonochromeAscii;
 
     let ascii = new Ascii('', 0);

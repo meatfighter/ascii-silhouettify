@@ -1,0 +1,6 @@
+${c1}Hello World!
+${c2}This is a test.
+${c3}Line 3
+\x24{c4}Line 4
+${c5}Line 5
+${c6}Line 6

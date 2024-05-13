@@ -1,15 +1,20 @@
 import sharp from 'sharp';
 import { clearClosestColorCache, findClosestColorIndex, findClosestColorIndexAmong, Palette } from '@/colors';
+import os from 'os';
 
 export class Image {
     indices: Uint8Array;
     width: number;
     height: number;
+    neofetchHeader: string;
+    neofetchStyles: string[];
 
-    constructor(indices: Uint8Array, width: number, height: number) {
+    constructor(indices: Uint8Array, width: number, height: number, neofetchHeader: string, neofetchStyles: string[]) {
         this.indices = indices;
         this.width = width;
         this.height = height;
+        this.neofetchHeader = neofetchHeader;
+        this.neofetchStyles = neofetchStyles;
     }
 
     getIndex(x: number, y: number) {
@@ -57,20 +62,30 @@ export async function loadImage(filename: string, pal: Palette, colors: number, 
     }
     clearClosestColorCache();
 
+    let neofetchHeader = 'colors';
+    const neofetchStyles = new Array<string>(256);
+
     outer: {
-        for (let i = frequencies.length - 1, c = 0; i >= 1; --i) {
+        for (let i = 1, c = 0; i < frequencies.length; ++i) {
             if (frequencies[i] > 0 && ++c > colors) {
                 break outer;
             }
         }
-        return new Image(indices, info.width, info.height);
+        for (let i = 1, c = 0; i < frequencies.length; ++i) {
+            if (frequencies[i] > 0) {
+                neofetchHeader += ` ${i}`;
+                neofetchStyles[i] = `\${c${++c}}`;
+            }
+        }
+        neofetchHeader += os.EOL + os.EOL;
+        return new Image(indices, info.width, info.height, neofetchHeader, neofetchStyles);
     }
 
     const set: number[] = [];
     while (set.length < colors) {
         let maxIndex = 0;
         let maxFrequency = 0;
-        for (let i = frequencies.length - 1; i >= 1; --i) {
+        for (let i = 1; i < frequencies.length; ++i) {
             if (frequencies[i] > maxFrequency) {
                 maxIndex = i;
                 maxFrequency = frequencies[i];
@@ -78,7 +93,10 @@ export async function loadImage(filename: string, pal: Palette, colors: number, 
         }
         frequencies[maxIndex] = 0;
         set.push(maxIndex);
+        neofetchHeader += ` ${maxIndex}`;
+        neofetchStyles[maxIndex] = `\${c${set.length}}`;
     }
+    neofetchHeader += os.EOL + os.EOL;
 
     switch (info.channels) {
         case 1:
@@ -104,5 +122,5 @@ export async function loadImage(filename: string, pal: Palette, colors: number, 
     }
     clearClosestColorCache();
 
-    return new Image(indices, info.width, info.height);
+    return new Image(indices, info.width, info.height, neofetchHeader, neofetchStyles);
 }

@@ -47,13 +47,24 @@ class GlyphImage {
                 break;
         }
 
-        this.neofetchEscapedCharacter = (character === '\\') ? '\\\\' : character;
+        switch (character) {
+            case '\\':
+                this.neofetchEscapedCharacter = '\\\\';
+                break;
+            case '$':
+                this.neofetchEscapedCharacter = '\x24';
+                break;
+            default:
+                this.neofetchEscapedCharacter = character;
+                break;
+        }
     }
 }
 
 export class Glyph {
     constructor(public character: string,
                 public htmlEscapedCharacter: string,
+                public neofetchEscapedCharacter: string,
                 public count: number) {
     }
 }
@@ -128,7 +139,8 @@ export async function loadGlyphs(): Promise<GlyphInfo> {
     const glyphs = new Array<Glyph>(glyphsImages.length);
     for (let i = glyphsImages.length - 1; i >= 0; --i) {
         const glyphImage = glyphsImages[i];
-        glyphs[i] = new Glyph(glyphImage.character, glyphImage.htmlEscapedCharacter, glyphImage.count);
+        glyphs[i] = new Glyph(glyphImage.character, glyphImage.htmlEscapedCharacter,
+                glyphImage.neofetchEscapedCharacter, glyphImage.count);
     }
 
     return new GlyphInfo(masks, glyphs, width, height, glyphs[1].count);

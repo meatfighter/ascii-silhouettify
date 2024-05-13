@@ -12,6 +12,7 @@ import { extractArgs, ParamType } from '@/args';
 import { ensureDirectoryExists, extractFilenameWithoutExtension, writeTextToFile } from '@/files';
 import * as console from 'console';
 import { getHtmlFooter, getHtmlHeader } from '@/html';
+import { Encoding } from '@/encoding';
 
 function printUsage() {
     console.log(`
@@ -39,9 +40,9 @@ Optional Values:
                                8         First 8 colors of the standard ANSI palette
                                16        Full 16-color standard ANSI palette
                                240       240 colors of the 256-color extended ANSI palette, excluding the standard 
-                                         16-color ANSI palette, which is commonly redefined (default) 
+                                         16-color ANSI palette, which is commonly redefined (default)
                                256       Full 256-color extended ANSI palette
-  -c, --colors ...           Maximum number of colors (range: 1--255) (default: 255)                             
+  -c, --colors ...           Maximum number of colors (range: 1--255) (default: 255)
   -f, --font-size ...        Terminal or browser font size in points (default: 12)
   -l, --line-height ...      Terminal or browser line height relative to font size (default: 1.2)
   -s, --scale ...            Input image scaling factor (default: 1)
@@ -49,7 +50,7 @@ Optional Values:
   -t, --threads ...          Threads count for processing (default: number of available logical processors)
 
 Optional Switches:
-  -u, --uncolored            Generate plain, unstyled text
+  -u, --uncolored            Generate unstyled, plain text
 
 Other Operations:
   -v, --version              Shows version number
@@ -177,13 +178,38 @@ async function main() {
     const title = extractFilenameWithoutExtension(inputFilenames[0]);
 
     const outputFilename = args.get('output') as string | undefined;
-    const lc = outputFilename ? outputFilename.toLowerCase() : undefined;
-    const html = (args.get('web') as boolean | undefined) || (lc && (lc.endsWith('.html') || lc.endsWith('.htm')))
-            || false;
+
+    let enc = args.get('encoding') as string | undefined;
+    if (!enc) {
+        enc = 'text';
+        if (outputFilename) {
+            const lc = outputFilename.toLowerCase();
+            if (lc.endsWith('.htm') || lc.endsWith('.html')) {
+                enc = 'html';
+            }
+        }
+    }
+
+    let encoding: Encoding;
+    switch (enc) {
+        case 'text':
+            encoding = Encoding.TEXT;
+            break;
+        case 'html':
+            encoding = Encoding.HTML;
+            break;
+        case 'neofetch':
+            encoding = Encoding.NEOFETCH;
+            break;
+        default:
+            console.log('\nEncoding must be either text, html, or neofetch.\n');
+            return;
+    }
+
     const colored = !((args.get('uncolored') as boolean | undefined) || false);
 
     let palette: Palette;
-    switch ((args.get('palette') as number | undefined) || 240) {
+    switch ((args.get('palette') as number | undefined) || (encoding === Encoding.NEOFETCH ? 16 : 240)) {
         case 8:
             palette = Palette.STANDARD_8;
             break;
@@ -200,9 +226,18 @@ async function main() {
             console.log('\nPalette must be either 8, 16, 240, or 256.\n');
             return;
     }
+    if (encoding === Encoding.NEOFETCH && (palette === Palette.EXTENDED_240 || palette === Palette.EXTENDED_256)) {
+        console.log('\nWhen encoding is neofetch, palette is restricted to 8 or 16.\n');
+        return;
+    }
 
-    const colors = (args.get('colors') as number | undefined) || 255;
-    if (colors < 1 || colors > 255) {
+    const colors = (args.get('colors') as number | undefined) || (encoding === Encoding.NEOFETCH ? 6 : 255);
+    if (encoding === Encoding.NEOFETCH) {
+        if (colors < 1 || colors > 6) {
+            console.log('\nWhen encoding is neofetch, colors is restricted to 1--6.\n');
+            return;
+        }
+    } else if (colors < 1 || colors > 255) {
         console.log('\nColors is restricted to 1--255.\n');
         return;
     }
@@ -245,7 +280,7 @@ async function main() {
     const glyphInfo = await loadGlyphs();
 
     let result: string = '';
-    if (html) {
+    if (encoding === Encoding.HTML) {
         result += getHtmlHeader(title, fontSize, lineHeight);
     }
 
@@ -262,12 +297,12 @@ async function main() {
             console.log(`\nFailed to load input image file: ${inputFilenames[i]}\n`);
             return;
         }
-        const ascii = await convert(image, glyphInfo, colored, scale, fontSize, lineHeight, html, htmlColors,
-            workers);
+        const ascii = await convert(image, glyphInfo, colored, scale, fontSize, lineHeight, encoding, palette,
+                htmlColors, workers);
         result += ascii.text;
     }
 
-    if (html) {
+    if (encoding === Encoding.HTML) {
         result += getHtmlFooter();
     }
 
