@@ -1,7 +1,7 @@
 import { Image } from '@/images';
 import { GlyphInfo } from '@/glyphs';
 import Offset from '@/offset';
-import { Encoding } from '@/encoding';
+import { Format } from '@/format';
 import { Palette } from '@/colors';
 
 export default class Task {
@@ -18,7 +18,7 @@ export default class Task {
         public marginX: number,
         public marginY: number,
         public color: boolean,
-        public encoding: Encoding,
+        public format: Format,
         public palette: Palette,
         public htmlColors: string[]
     ) {

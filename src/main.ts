@@ -9,8 +9,9 @@ import convert from '@/converter';
 import { extractArgs, ParamType } from '@/args';
 import { ensureDirectoryExists, extractFilenameWithoutExtension, writeTextToFile } from '@/files';
 import { getHtmlFooter, getHtmlHeader } from '@/html';
-import { Encoding } from '@/encoding';
+import { Format } from '@/format';
 
+// TODO RENAME UNCOLORED TO MONOCHROME (m)
 function printUsage() {
     console.log(`
 Usage: ascii-silhouette [options]
@@ -28,7 +29,7 @@ Required Values:
 
 Optional Values:
   -o, --output "..."         Output filename (default: stdout)
-  -e, --encoding ...         Output format:
+  -r, --format ...           Output format:
                                text      Plain or ANSI-colored text (default when file extension is not .html)    
                                html      Monospaced text in HTML format
                                neofetch  Neofetch's custom ASCII art format, which is limited to 6 colors of the 
@@ -86,8 +87,8 @@ async function main() {
                 type: ParamType.STRING,
             },
             {
-                key: 'encoding',
-                flags: [ '-e', '--encoding' ],
+                key: 'format',
+                flags: [ '-r', '--format' ],
                 type: ParamType.STRING,
             },
             {
@@ -176,37 +177,37 @@ async function main() {
 
     const outputFilename = args.get('output') as string | undefined;
 
-    let enc = args.get('encoding') as string | undefined;
-    if (!enc) {
-        enc = 'text';
+    let fmt = args.get('format') as string | undefined;
+    if (!fmt) {
+        fmt = 'text';
         if (outputFilename) {
             const lc = outputFilename.toLowerCase();
             if (lc.endsWith('.htm') || lc.endsWith('.html')) {
-                enc = 'html';
+                fmt = 'html';
             }
         }
     }
 
-    let encoding: Encoding;
-    switch (enc) {
+    let format: Format;
+    switch (fmt) {
         case 'text':
-            encoding = Encoding.TEXT;
+            format = Format.TEXT;
             break;
         case 'html':
-            encoding = Encoding.HTML;
+            format = Format.HTML;
             break;
         case 'neofetch':
-            encoding = Encoding.NEOFETCH;
+            format = Format.NEOFETCH;
             break;
         default:
-            console.log('\nEncoding must be either text, html, or neofetch.\n');
+            console.log('\nFormat must be either text, html, or neofetch.\n');
             return;
     }
 
     const colored = !((args.get('uncolored') as boolean | undefined) || false);
 
     let palette: Palette;
-    switch ((args.get('palette') as number | undefined) || (encoding === Encoding.NEOFETCH ? 16 : 240)) {
+    switch ((args.get('palette') as number | undefined) || (format === Format.NEOFETCH ? 16 : 240)) {
         case 8:
             palette = Palette.STANDARD_8;
             break;
@@ -223,15 +224,15 @@ async function main() {
             console.log('\nPalette must be either 8, 16, 240, or 256.\n');
             return;
     }
-    if (encoding === Encoding.NEOFETCH && (palette === Palette.EXTENDED_240 || palette === Palette.EXTENDED_256)) {
-        console.log('\nWhen encoding is neofetch, palette is restricted to 8 or 16.\n');
+    if (format === Format.NEOFETCH && (palette === Palette.EXTENDED_240 || palette === Palette.EXTENDED_256)) {
+        console.log('\nWhen format is neofetch, palette is restricted to 8 or 16.\n');
         return;
     }
 
-    const colors = (args.get('colors') as number | undefined) || (encoding === Encoding.NEOFETCH ? 6 : 255);
-    if (encoding === Encoding.NEOFETCH) {
+    const colors = (args.get('colors') as number | undefined) || (format === Format.NEOFETCH ? 6 : 255);
+    if (format === Format.NEOFETCH) {
         if (colors < 1 || colors > 6) {
-            console.log('\nWhen encoding is neofetch, colors is restricted to 1--6.\n');
+            console.log('\nWhen format is neofetch, colors is restricted to 1--6.\n');
             return;
         }
     } else if (colors < 1 || colors > 255) {
@@ -277,7 +278,7 @@ async function main() {
     const glyphInfo = await loadGlyphs();
 
     let result: string = '';
-    if (encoding === Encoding.HTML) {
+    if (format === Format.HTML) {
         result += getHtmlHeader(title, fontSize, lineHeight);
     }
 
@@ -294,12 +295,12 @@ async function main() {
             console.log(`\nFailed to load input image file: ${inputFilenames[i]}\n`);
             return;
         }
-        const ascii = await convert(image, glyphInfo, colored, scale, fontSize, lineHeight, encoding, palette,
+        const ascii = await convert(image, glyphInfo, colored, scale, fontSize, lineHeight, format, palette,
                 htmlColors, workers);
         result += ascii.text;
     }
 
-    if (encoding === Encoding.HTML) {
+    if (format === Format.HTML) {
         result += getHtmlFooter();
     }
 

@@ -3,12 +3,12 @@ import { parentPort } from 'worker_threads';
 import { Image } from '@/images';
 import Ascii from '@/ascii';
 import Task from '@/task';
-import { Encoding } from '@/encoding';
+import { Format } from '@/format';
 import { Palette } from '@/colors';
 
 function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii {
 
-    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, encoding } = task;
+    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, format } = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
 
     let text = '';
@@ -49,11 +49,11 @@ function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii 
             }
 
             // Append the printable ASCII character.
-            switch (encoding) {
-                case Encoding.HTML:
+            switch (format) {
+                case Format.HTML:
                     text += glyphs[glyphIndex].htmlEscapedCharacter;
                     break;
-                case Encoding.NEOFETCH:
+                case Format.NEOFETCH:
                     text += glyphs[glyphIndex].neofetchEscapedCharacter;
                     break;
                 default:
@@ -72,14 +72,14 @@ function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii 
 
 function toColorAscii(task: Task, originX: number, originY: number): Ascii {
 
-    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, encoding, palette, htmlColors }
+    const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, format, palette, htmlColors }
             = task;
     const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs, minCount: glyphMinCount } = glyphInfo;
 
     const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
     const ansi16 = palette === Palette.STANDARD_8 || palette === Palette.STANDARD_16;
-    let text = (encoding === Encoding.NEOFETCH) ? image.neofetchHeader : '';
+    let text = (format === Format.NEOFETCH) ? image.neofetchHeader : '';
     let notFirstSpan = false;
     let lastColorIndex = -1;
     let matched = 0;
@@ -168,15 +168,15 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
             // If the color is different from the previous one, then append the ANSI escape code to set the foreground
             // color to an index of the 256-color palette.
             if (lastColorIndex !== bestColorIndex) {
-                switch (encoding) {
-                    case Encoding.HTML:
+                switch (format) {
+                    case Format.HTML:
                         if (notFirstSpan) {
                             text += "</span>";
                         }
                         text += `<span style="color: #${htmlColors[bestColorIndex]};">`;
                         notFirstSpan = true;
                         break;
-                    case Encoding.NEOFETCH:
+                    case Format.NEOFETCH:
                         text += image.neofetchStyles[bestColorIndex];
                         break;
                     default:
@@ -196,11 +196,11 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
             }
 
             // Append the printable ASCII character.
-            switch (encoding) {
-                case Encoding.HTML:
+            switch (format) {
+                case Format.HTML:
                     text += glyphs[bestGlyphIndex].htmlEscapedCharacter;
                     break;
-                case Encoding.NEOFETCH:
+                case Format.NEOFETCH:
                     text += glyphs[bestGlyphIndex].neofetchEscapedCharacter;
                     break;
                 default:
@@ -214,12 +214,12 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
         text += os.EOL;
     }
 
-    switch (encoding) {
-        case Encoding.TEXT:
+    switch (format) {
+        case Format.TEXT:
             // Append ANSI escape code to reset the text formatting to the terminal's default settings.
             text += '\x1b[0m';
             break;
-        case Encoding.HTML:
+        case Format.HTML:
             if (notFirstSpan) {
                 text += "</span>";
             }

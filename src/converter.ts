@@ -5,11 +5,11 @@ import { GlyphInfo } from '@/glyphs';
 import Ascii from '@/ascii';
 import Offset from '@/offset';
 import Task from '@/task';
-import { Encoding } from '@/encoding';
+import { Format } from '@/format';
 import { Palette } from '@/colors';
 
 export default async function convert(image: Image, glyphInfo: GlyphInfo, color: boolean, imageScale: number,
-                                      fontSize: number, lineHeight: number, encoding: Encoding, palette: Palette,
+                                      fontSize: number, lineHeight: number, format: Format, palette: Palette,
                                       htmlColors: string[], workers: Worker[]): Promise<Ascii> {
 
     const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
@@ -52,7 +52,7 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
             }
             worker.addListener('message', messageHandler);
             worker.postMessage(new Task(offs[i], image, glyphInfo, glyphScaleX, glyphScaleY, rows, cols, rowScale,
-                colScale, marginX, marginY, color, encoding, palette, htmlColors));
+                colScale, marginX, marginY, color, format, palette, htmlColors));
         }
     });
 

@@ -1,4 +1,4 @@
-export enum Encoding {
+export enum Format {
     TEXT,
     HTML,
     NEOFETCH,
