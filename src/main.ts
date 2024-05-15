@@ -11,7 +11,6 @@ import { ensureDirectoryExists, extractFilenameWithoutExtension, writeTextToFile
 import { getHtmlFooter, getHtmlHeader } from '@/html';
 import { Format } from '@/format';
 
-// TODO RENAME UNCOLORED TO MONOCHROME (m)
 function printUsage() {
     console.log(`
 Usage: ascii-silhouette [options]
@@ -29,7 +28,7 @@ Required Values:
 
 Optional Values:
   -o, --output "..."         Output filename (default: stdout)
-  -r, --format ...           Output format:
+  -f, --format ...           Output format:
                                text      Plain or ANSI-colored text (default when file extension is not .html)    
                                html      Monospaced text in HTML format
                                neofetch  Neofetch's custom ASCII art format, which is limited to 6 colors of the 
@@ -41,14 +40,14 @@ Optional Values:
                                          16-color ANSI palette, which is commonly redefined (default)
                                256       Full 256-color extended ANSI palette
   -c, --colors ...           Maximum number of colors (range: 1--255) (default: 255)
-  -f, --font-size ...        Terminal or browser font size in points (default: 12)
+  -F, --font-size ...        Terminal or browser font size in points (default: 12)
   -l, --line-height ...      Terminal or browser line height relative to font size (default: 1.2)
   -s, --scale ...            Input image scaling factor (default: 1)
   -d, --darkness ...         Regions darker than this brightness level translate to blank spaces (0--100) (default: 10)
   -t, --threads ...          Threads count for processing (default: number of available logical processors)
 
 Optional Switches:
-  -u, --uncolored            Generate unstyled, plain text
+  -m, --monochrome           Generate unstyled, plain text
 
 Other Operations:
   -v, --version              Shows version number
@@ -88,7 +87,7 @@ async function main() {
             },
             {
                 key: 'format',
-                flags: [ '-r', '--format' ],
+                flags: [ '-f', '--format' ],
                 type: ParamType.STRING,
             },
             {
@@ -103,7 +102,7 @@ async function main() {
             },
             {
                 key: 'font-size',
-                flags: [ '-f', '--font-size' ],
+                flags: [ '-F', '--font-size' ],
                 type: ParamType.FLOAT,
             },
             {
@@ -132,8 +131,8 @@ async function main() {
                 type: ParamType.NONE,
             },
             {
-                key: 'uncolored',
-                flags: [ '-u', '--uncolored' ],
+                key: 'monochrome',
+                flags: [ '-m', '--monochrome' ],
                 type: ParamType.NONE,
             },
             {
@@ -204,10 +203,10 @@ async function main() {
             return;
     }
 
-    const colored = !((args.get('uncolored') as boolean | undefined) || false);
+    const colored = !((args.get('monochrome') as boolean | undefined) || false);
 
     let palette: Palette;
-    switch ((args.get('palette') as number | undefined) || (format === Format.NEOFETCH ? 16 : 240)) {
+    switch ((args.get('palette') as number | undefined) || 240) {
         case 8:
             palette = Palette.STANDARD_8;
             break;
@@ -224,18 +223,9 @@ async function main() {
             console.log('\nPalette must be either 8, 16, 240, or 256.\n');
             return;
     }
-    if (format === Format.NEOFETCH && (palette === Palette.EXTENDED_240 || palette === Palette.EXTENDED_256)) {
-        console.log('\nWhen format is neofetch, palette is restricted to 8 or 16.\n');
-        return;
-    }
 
-    const colors = (args.get('colors') as number | undefined) || (format === Format.NEOFETCH ? 6 : 255);
-    if (format === Format.NEOFETCH) {
-        if (colors < 1 || colors > 6) {
-            console.log('\nWhen format is neofetch, colors is restricted to 1--6.\n');
-            return;
-        }
-    } else if (colors < 1 || colors > 255) {
+    const colors = (args.get('colors') as number | undefined) || 255;
+    if (colors < 1 || colors > 255) {
         console.log('\nColors is restricted to 1--255.\n');
         return;
     }
