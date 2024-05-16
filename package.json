@@ -1,5 +1,5 @@
 {
-  "name": "ascii-silouette",
+  "name": "ascii-silouettify",
   "version": "1.0.0",
   "type": "module",
   "module": "./dist/main.bundle.js",
@@ -7,11 +7,11 @@
     "clean": "rimraf ./dist ./bin",
     "build": "npm run clean && rollup -c",
     "run": "node ./dist/main.bundle.js",
-    "pack": "npm pack && shx mkdir -p bin && shx mv *.tgz bin/ascii-silouette.tgz",
+    "pack": "npm pack && shx mkdir -p bin && shx mv *.tgz bin/ascii-silouettify.tgz",
     "all": "npm run build && npm run pack",
-    "install-global": "npm install -g ./bin/ascii-silouette.tgz",
-    "uninstall-global": "npm uninstall -g ascii-silouette",
-    "run-global": "ascii-silouette"
+    "install-global": "npm install -g ./bin/ascii-silouettify.tgz",
+    "uninstall-global": "npm uninstall -g ascii-silouettify",
+    "run-global": "ascii-silouettify"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
@@ -33,7 +33,7 @@
     "dist"
   ],
   "bin": {
-    "ascii-silouette": "./dist/main.bundle.js"
+    "ascii-silouettify": "./dist/main.bundle.js"
   },
   "dependencies": {
     "chroma-js": "^2.4.2",

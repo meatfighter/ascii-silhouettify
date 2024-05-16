@@ -224,8 +224,13 @@ async function main() {
             return;
     }
 
-    const colors = (args.get('colors') as number | undefined) || 255;
-    if (colors < 1 || colors > 255) {
+    const colors = (args.get('colors') as number | undefined) || (format === Format.NEOFETCH ? 6 : 255);
+    if (format === Format.NEOFETCH) {
+        if (colors < 1 || colors > 6) {
+            console.log('\nWhen format is neofetch, colors is restricted to 1--6.\n');
+            return;
+        }
+    } else if (colors < 1 || colors > 255) {
         console.log('\nColors is restricted to 1--255.\n');
         return;
     }
