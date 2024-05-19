@@ -80,7 +80,7 @@ export class GlyphInfo {
 
 export async function loadGlyphs(): Promise<GlyphInfo> {
     const masks: number[][] = [];
-    const glyphsImages = new Array<GlyphImage>(PRINTABLE_ASCII.length)
+    const glyphsImages = new Array<GlyphImage>(PRINTABLE_ASCII.length);
     const { data, info } = await sharp(GLYPHS_IMAGE_FILENAME).raw().toColourspace('b-w')
         .toBuffer({ resolveWithObject: true });
     const width = info.width / PRINTABLE_ASCII.length;
