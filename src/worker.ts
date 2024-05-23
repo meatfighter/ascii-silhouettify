@@ -221,7 +221,7 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
     switch (format) {
         case Format.HTML:
             if (notFirstSpan) {
-                text += "</span>";
+                text += '</span>';
             }
             break;
         case Format.NEOFETCH: {
