@@ -36,7 +36,7 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
     }
     const offs = partitionArray(offsets, workers.length);
 
-    let ascii = new Ascii('', 0);
+    let ascii = new Ascii('', -1);
     let wc = workers.length;
     await new Promise<void>(resolve => {
         for (let i = workers.length - 1; i >= 0; --i) {
