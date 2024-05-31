@@ -111,7 +111,7 @@ export async function loadGlyphs(): Promise<GlyphInfo> {
     // to the glyph in the table row corresponding to the pixel is cleared.
     //
     // During image conversion, a 95-bit value is initialized to all ones for each rectangular region to be replaced by
-    // a glyph. Then, for each black/uncolored pixels with the region, the value is bitwise ANDed with the table row
+    // a glyph. Then, for each black/uncolored pixels in the region, the value is bitwise ANDed with the table row
     // corresponding to the pixel. The idea being if the glyph pixel is white while the image region pixel is
     // black/uncolored, then that particular glyph cannot replace the region. Since the mask contains a zero at the bit
     // position corresponding to the glyph, the bitwise AND operation excludes the glyph. After repeating that for all
