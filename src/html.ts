@@ -9,6 +9,10 @@ export function getHtmlHeader(title: string, fontSize: number, lineHeight: numbe
     <link href="https://fonts.cdnfonts.com/css/cascadia-code" rel="stylesheet">
     <title>${title}</title>   
     <style>
+      * {
+        font-variant-ligatures: none;
+        font-feature-settings: 'liga' 0, 'clig' 0;
+      }    
       html, body {
         background: #0C0C0C;
         color: #CCCCCC;
