@@ -101,36 +101,20 @@ export async function loadGlyphs(): Promise<GlyphInfo> {
 
     glyphsImages.sort((a, b) => a.count - b.count);
 
-    // Create a table of bit masks, each composed of 95 bits, represented by three 32-bit numbers. Each bit corresponds
-    // to a printable ASCII character ordered by the number of white pixels within each glyph. Bit-0 is the space
-    // character (zero white pixels), bit-94 is the at sign (maximum number of white pixels), and bit-95 is always zero
-    // since there are only 95 printable ASCII characters. Each row of the table corresponds to a pixel of the
-    // rectangular region in which all glyphs fit.
-    //
-    // All 95 bits of all table rows are initially set. Then, for each white pixel in each glyph, the bit corresponding
-    // to the glyph in the table row corresponding to the pixel is cleared.
-    //
-    // During image conversion, a 95-bit value is initialized to all ones for each rectangular region to be replaced by
-    // a glyph. Then, for each black/uncolored pixels in the region, the value is bitwise ANDed with the table row
-    // corresponding to the pixel. The idea being if the glyph pixel is white while the image region pixel is
-    // black/uncolored, then that particular glyph cannot replace the region. Since the mask contains a zero at the bit
-    // position corresponding to the glyph, the bitwise AND operation excludes the glyph. After repeating that for all
-    // pixels in the region, the number of leading zero bits is counted in the value. That number corresponds to the
-    // first remaining glyph whose pixels are fully contained within the white/colored pixels of the image.
     masks.length = width * height;
     for (let i = masks.length - 1; i >= 0; --i) {
-        masks[i] = [ 0x7FFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF ];
+        masks[i] = [ 0, 0, 0 ];
     }
     for (let i = glyphsImages.length - 1; i >= 0; --i) {
         const pixels = glyphsImages[i].pixels;
         const index = i >> 5;
-        const mask = ~(1 << (i & 31));
+        const mask = 1 << (i & 31);
         for (let j = height - 1; j >= 0; --j) {
             const row = pixels[j];
             const tableOffset = width * j;
             for (let k = row.length - 1; k >= 0; --k) {
-                if (row[k]) {
-                    masks[tableOffset + k][index] &= mask;
+                if (!row[k]) {
+                    masks[tableOffset + k][index] |= mask;
                 }
             }
         }
