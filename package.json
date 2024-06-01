@@ -9,8 +9,8 @@
     "run": "node ./dist/main.bundle.js",
     "pack": "npm pack && shx mkdir -p bin && shx mv *.tgz bin/ascii-silhouettify.tgz",
     "all": "npm run build && npm run pack",
-    "install-global": "npm install -g ./bin/ascii-silhouettify.tgz sharp chroma-js",
-    "uninstall-global": "npm uninstall -g ascii-silhouettify sharp chroma-js",
+    "install-global": "npm install -g ./bin/ascii-silhouettify.tgz",
+    "uninstall-global": "npm uninstall -g ascii-silhouettify",
     "run-global": "ascii-silhouettify"
   },
   "devDependencies": {
@@ -36,6 +36,8 @@
     "ascii-silhouettify": "./dist/main.bundle.js"
   },
   "dependencies": {
-    "glob": "^10.3.12"
+    "chroma-js": "^2.4.2",
+    "glob": "^10.3.12",
+    "sharp": "^0.33.4"
   }
 }
