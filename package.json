@@ -36,7 +36,6 @@
     "ascii-silhouettify": "./dist/main.bundle.js"
   },
   "dependencies": {
-    "chroma-js": "^2.4.2",
     "glob": "^10.3.12"
   }
 }

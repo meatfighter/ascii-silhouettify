@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import os from 'os';
 import { Worker } from 'worker_threads';
 import { loadHtmlColors, Palette } from '@/colors';
@@ -277,9 +280,10 @@ async function main() {
         result += getHtmlHeader(title, fontSize, lineHeight);
     }
 
+    const workerPath = path.join(dirname(fileURLToPath(import.meta.url)), 'worker.bundle.js');
     const workers = new Array<Worker>(threads);
     for (let i = threads - 1; i >= 0; --i) {
-        workers[i] = new Worker('./dist/worker.bundle.js');
+        workers[i] = new Worker(workerPath);
     }
 
     for (let i = 0; i < inputFilenames.length; ++i) {
