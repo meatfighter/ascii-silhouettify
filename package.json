@@ -1,5 +1,5 @@
 {
-  "name": "ascii-silouettify",
+  "name": "ascii-silhouettify",
   "version": "1.0.0",
   "type": "module",
   "module": "./dist/main.bundle.js",
@@ -7,11 +7,11 @@
     "clean": "rimraf ./dist ./bin",
     "build": "npm run clean && rollup -c",
     "run": "node ./dist/main.bundle.js",
-    "pack": "npm pack && shx mkdir -p bin && shx mv *.tgz bin/ascii-silouettify.tgz",
+    "pack": "npm pack && shx mkdir -p bin && shx mv *.tgz bin/ascii-silhouettify.tgz",
     "all": "npm run build && npm run pack",
-    "install-global": "npm install -g ./bin/ascii-silouettify.tgz",
-    "uninstall-global": "npm uninstall -g ascii-silouettify",
-    "run-global": "ascii-silouettify"
+    "install-global": "npm install -g ./bin/ascii-silhouettify.tgz sharp chroma-js",
+    "uninstall-global": "npm uninstall -g ascii-silhouettify sharp chroma-js",
+    "run-global": "ascii-silhouettify"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
@@ -33,11 +33,10 @@
     "dist"
   ],
   "bin": {
-    "ascii-silouettify": "./dist/main.bundle.js"
+    "ascii-silhouettify": "./dist/main.bundle.js"
   },
   "dependencies": {
     "chroma-js": "^2.4.2",
-    "glob": "^10.3.12",
-    "sharp": "^0.33.3"
+    "glob": "^10.3.12"
   }
 }

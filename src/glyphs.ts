@@ -1,6 +1,7 @@
 import sharp from 'sharp';
-
-const GLYPHS_IMAGE_FILENAME = 'assets/glyphs.png';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 const PRINTABLE_ASCII
     = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
@@ -81,8 +82,8 @@ export class GlyphInfo {
 export async function loadGlyphs(): Promise<GlyphInfo> {
     const masks: number[][] = [];
     const glyphsImages = new Array<GlyphImage>(PRINTABLE_ASCII.length);
-    const { data, info } = await sharp(GLYPHS_IMAGE_FILENAME).raw().toColourspace('b-w')
-        .toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(path.join(dirname(fileURLToPath(import.meta.url)), 'assets', 'glyphs.png'))
+        .raw().toColourspace('b-w').toBuffer({ resolveWithObject: true });
     const width = info.width / PRINTABLE_ASCII.length;
     const height = info.height;
 

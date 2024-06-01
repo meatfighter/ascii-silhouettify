@@ -47,7 +47,7 @@ Optional Values:
   -t, --threads ...          Threads count for processing (default: number of available logical processors)
 
 Optional Switches:
-  -m, --monochrome           Generate unstyled, plain text
+  -m, --monochrome           Generate uncolored, plain text
 
 Other Operations:
   -v, --version              Shows version number
