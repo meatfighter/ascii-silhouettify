@@ -43,7 +43,7 @@ Optional Values:
   -F, --font-size ...        Terminal or browser font size in points (default: 12)
   -l, --line-height ...      Terminal or browser line height relative to font size (default: 1.2)
   -s, --scale ...            Input image scaling factor (default: 1)
-  -d, --darkness ...         Regions darker than this brightness level translate to blank spaces (0--100) (default: 10)
+  -d, --darkness ...         Regions darker than this brightness level translate to blank spaces (0--100) (default: 5)
   -t, --threads ...          Threads count for processing (default: number of available logical processors)
 
 Optional Switches:
@@ -253,7 +253,7 @@ async function main() {
         return;
     }
 
-    const darkness = (args.get('darkness') as number | undefined) || 10;
+    const darkness = (args.get('darkness') as number | undefined) || 5;
     if (darkness < 0 || darkness > 100) {
         console.log('\nDarkness is restricted to 0--100.\n');
         return;
