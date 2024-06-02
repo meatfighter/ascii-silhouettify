@@ -34,8 +34,7 @@ Optional Values:
   -f, --format ...           Output format:
                                text      Plain or ANSI-colored text (default when file extension is not .html)    
                                html      Monospaced text in HTML format
-                               neofetch  Neofetch's custom ASCII art format, which is limited to 6 colors of the 
-                                         standard 16-color ANSI palette
+                               neofetch  Neofetch's custom ASCII art format (limited to 6 colors)
   -p, --palette ...          Restricted color set:
                                8         First 8 colors of the standard ANSI palette
                                16        Full 16-color standard ANSI palette
