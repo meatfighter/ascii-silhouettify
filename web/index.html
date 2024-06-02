@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0C0C0C">
+    <meta name="date" content="2024-06-02">
+
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="./icons/favicon.ico" sizes="any" type="image/x-icon">
+    <link rel="shortcut icon" href="./icons/favicon.ico" sizes="any" type="image/x-icon">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+    <link rel="mask-icon" href="./icons/mask-icon.svg" color="#000000">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&family=Open+Sans&display=swap">
+    <link rel="stylesheet" href="./styles/index.css?v=2024-06-02" type="text/css">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']]
+            },
+            svg: {
+                fontCache: 'global',
+                linebreaks: {
+                    automatic: true
+                }
+            },
+            CommonHTML: {
+                linebreaks: {
+                    automatic: true
+                }
+            },
+            "HTML-CSS": {
+                linebreaks: {
+                    automatic: true
+                }
+            },
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
+    <title>ASCII Silhouettify</title>
+
+    <base target="_blank">
+</head>
+<body>
+<p class="centered title"><img class="inline" src="./images/logo-white.svg" alt="AS" style="width: 100px; height: auto;"> ASCII Silhouettify</p>
+
+<p id="index" class="centered" style="margin-top: -30px;">[ <a href="#about" target="_self">About</a> | <a href="#example" target="_self">Example</a> | <a href="#galleries" target="_self">Galleries</a> | <a href="#install" target="_self">Install</a> | <a href="#uninstall" target="_self">Uninstall</a> | <a href="#options" target="_self">Options</a> | <a href="#algorithm" target="_self">Algorithm</a> ]</p>
+
+<h1 id="about"><a class="header" href="#about" target="_self">About</a></h1>
+
+<p>ASCII Silhouettify is an app that converts images into ASCII silhouettes, a style of ASCII art distinguished by uniformly filled geometric shapes rather than lines or textures. For input, the app expects flat graphics&mdash;visuals with minimalistic, high-contrast forms lacking dimensional depth, such as logos, banners, and pixel art. It cannot handle photographs because it does not render shading, highlights, shadows, or gradients.</p>
+
+<p>ASCII Silhouettify restricts itself to the 95 printable ASCII characters, the medium of traditional ASCII artists, as opposed to the line and block characters prevalent in ANSI art or the copious Unicode characters of kaomoji. However, based on user configuration, the app outputs monochrome plain text, text colored with ANSI escape sequences, HTML with or without color, or Neofetch ASCII art format.</p>
+
+<p>ASCII Silhouettify is a desktop app accessible from a browser and from the command-line.</p>
+
+<button class="button" id="appButton">Launch Browser Version</button>
+
+<h1 id="example"><a class="header" href="#example" target="_self">Example</a></h1>
+
+<p>Here is the output of <a href="https://github.com/dylanaraps/neofetch">Neofetch</a> under an instance of Ubuntu:</p>
+
+<p><img class="centered" id="./images/neofetch-0.png" src="./images/neofetch-0.png" alt="Neofetch Ubuntu output"></p>
+
+<p>For greater ASCII art accuracy, we obtain a high-resolution image of the Ubuntu logo from the web, and we scale it to the size we want it to appear in the console:</p>
+
+<p><img class="centered" id="./images/neofetch-1.png" src="./images/neofetch-1.png" alt="Ubuntu logo"></p>
+
+<p>We run it through ASCII Silhouettify:</p>
+
+<p><img class="centered" id="./images/neofetch-2.png" src="./images/neofetch-2.png" alt="Ubuntu logo ANSI art"></p>
+
+<p>By default, ASCII Silhouettify generates text colored with ANSI escape sequences. With the <code>-o</code> flag, we can direct the output to a file that Neofetch will display. But Neofetch inserts a wide margin between ANSI art and the OS metrics. To prevent this, we&lsquo;ll use Neofetch&lsquo;s <a href="https://github.com/dylanaraps/neofetch/wiki/Custom-Ascii-art-file-format">custom ASCII art file format</a>: </p>
+
+<p><img class="centered" id="./images/neofetch-4.png" src="./images/neofetch-4.png" alt="Generating Neofetch ASCII art file"></p>
+
+<p>The first line of the output file is a list of color indices. The successive lines contain the encoded image:</p>
+
+<p><img class="centered" id="./images/neofetch-5.png" src="./images/neofetch-5.png" alt="Neofetch ASCII art file"></p>
+
+<p>In a text editor, we copy the first line to the clipboard, and then we remove it.</p>
+
+<p>We invoke Neofetch with the following command, pasting in the value we stored in the clipboard:</p>
+
+<p><img class="centered" id="./images/neofetch-3.png" src="./images/neofetch-3.png" alt="Neofetch with improved logo"></p>
+
+<p>Neofetch is a bash script. To make the change permanent, we replace the following part of the script, again using the value we stored in the clipboard.</p>
+
+<p><img class="centered" id="./images/neofetch-6.png" src="./images/neofetch-6.png" alt="Neofetch script segment"></p>
+
+<p>For comparison, here is the original logo overlaid on the generated result:</p>
+
+<p><img class="centered" id="./images/neofetch-7.png" src="./images/neofetch-7.png" alt="Logos overlaid"></p>
+
+<p>Note how the algorithm selects the largest characters that fit within outlines of each colored region.</p>
+
+
+<h1 id="galleries"><a class="header" href="#galleries" target="_self">Galleries</a></h1>
+
+<p>For more examples, click on one of the buttons below.</p>
+
+<div class="center-container">
+    <div class="button-container">
+        <button class="button rainbow-button" id="colorGalleryButton">Color Gallery</button>
+        <button class="button greyscale-button" id="monochromeGalleryButton">Monochrome Gallery</button>
+    </div>
+</div>
+
+
+<h1 id="install"><a class="header" href="#install" target="_self">Install</a></h1>
+
+<p>The command-line version of ASCII Silhouettify is a Node.js application. If you don't have Node.js installed on your system, follow the steps described <a href="https://nodejs.org/en/learn/getting-started/how-to-install-nodejs">here</a>.</p>
+
+<p>In the Windows Command Prompt or PowerShell (but not WSL), run:</p>
+
+<pre class="code">npm install -g ascii-silhouettify</pre>
+
+<p>On macOS and Linux (including WSL), you need to use <code>sudo</code>:</p>
+
+<pre class="code">sudo npm install -g ascii-silhouettify</pre>
+
+
+<h1 id="uninstall"><a class="header" href="#uninstall" target="_self">Uninstall</a></h1>
+
+<p>In the Windows Command Prompt or PowerShell (but not WSL), run:</p>
+
+<pre class="code">npm uninstall -g ascii-silhouettify</pre>
+
+<p>On macOS and Linux (including WSL), you need to use <code>sudo</code>:</p>
+
+<pre class="code">sudo npm uninstall -g ascii-silhouettify</pre>
+
+
+<h1 id="options"><a class="header" href="#options" target="_self">Options</a></h1>
+
+<p>The browser version and the command-line version support the same set of options. In the command-line version, the <code>-h</code> flag outputs a message that summarizes the information below.</p>
+
+
+<h2 id="options.input"><a class="header" href="#options.input" target="_self">Input</a></h2>
+
+<p>ASCII Silhouettify can convert multiple images at the same time. It supports <code>png</code>, <code>svg</code>, <code>jpg</code>, <code>webp</code>, <code>gif</code>, <code>tif</code>, <code>heif</code>, <code>avif</code>, and <code>pdf</code> image formats. The command-line version&lsquo;s <code>-i</code> flag accepts various filename pattern-matching rules (see the help message for details).</p>
+
+
+<h2 id="options.output"><a class="header" href="#options.output" target="_self">Output</a></h2>
+
+<p>ASCII Silhouettify can output plane or ANSI-colored text, monospaced text in HTML format, or Neofetch&lsquo;s custom ASCII art format. The latter is limited to six colors of the <span class="nowrap">256-color</span> extended ANSI palette.</p>
+
+
+<h2 id="options.palette"><a class="header" href="#options.palette" target="_self">Palette</a></h2>
+
+<p>By default, ASCII Silhouettify uses a palette of 240 colors from the <span class="nowrap">256-color</span> extended ANSI palette, excluding the <span class="nowrap">16-color</span> standard ANSI palette, as it is often redefined in modern terminal emulators. However, users have the option to select the first 8 colors of the standard ANSI palette, the full <span class="nowrap">16-color</span> standard ANSI palette, the full <span class="nowrap">256-color</span> extended ANSI palette, or stick with the default <span class="nowrap">240-color</span> palette.</p>
+
+
+<h2 id="options.colors-and-monochrome"><a class="header" href="#options.colors-and-monochrome" target="_self">Colors and Monochrome</a></h2>
+
+<p>The user can specify the maximum number of colors to appear in the output, not counting the presumably black background. The default is 255. Monochrome mode effectively sets this to one. For Neofetch&lsquo;s custom ASCII art format, it defaults to six, the maximum number of colors supported by that format.</p>
+
+
+<h2 id="options.font-size-and-line-height"><a class="header" href="#options.font-size-and-line-height" target="_self">Font Size and Line Height</a></h2>
+
+<p>The aspect ratio of the generated ASCII art depends on the terminal emulator&lsquo;s font, font size, and line height. To perfect it, capture an image of text in the terminal, and measure the size of each monospaced character in pixels. For example, in the IntelliJ terminal, each character occupies <span class="nowrap">8&times;22</span> pixels:</p>
+
+<p><img class="centered" id="./images/intellij.png" src="./images/intellij.png" alt="Intellij terminal"></p>
+
+<p>Plug the values into the following formula to determine the line height for any font size.</p>
+
+<p class="centered">$\text{line height} = \dfrac{9 \times \text{character height}}{16 \times \text{character width}}$</p>
+
+<p>The formula assumes a standard screen resolution of <span class="nowrap">96 PPI</span> for the conversion from pixels to points. And the font size does not matter because line height is in em, a unit relative to the font size.</p>
+
+<p>Here are some line heights measured on the developer&lsquo;s Windows desktop:</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>Application</th>
+        <th>Line Height</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>IntelliJ Terminal</td>
+        <td>1.546875</td>
+    </tr>
+    <tr>
+        <td>Putty</td>
+        <td>1.125</td>
+    </tr>
+    <tr>
+        <td>Notepad</td>
+        <td>1.0125</td>
+    </tr>
+    <tr>
+        <td>Notepad++</td>
+        <td>1.2</td>
+    </tr>
+    <tr>
+        <td>Windows Command Prompt</td>
+        <td>1.125</td>
+    </tr>
+    <tr>
+        <td>Windows Console Host</td>
+        <td>1.25</td>
+    </tr>
+    <tr>
+        <td>Windows Terminal</td>
+        <td>1.2</td>
+    </tr>
+    </tbody>
+</table>
+
+<p>Your mileage may vary.</p>
+
+
+<h2 id="options.scale"><a class="header" href="#options.scale" target="_self">Scale</a></h2>
+
+<p>Ideally, the input image file should be scaled in a paint program to the size the user wants it to appear in the terminal. However, for minor tweaks, ASCII Silhouettify accepts an image scaling factor, which defaults to one.</p>
+
+
+<h2 id="options.darkness"><a class="header" href="#options.darkness" target="_self">Darkness</a></h2>
+
+<p>The conversion algorithm replaces areas of the image below 5% brightness with space characters, enabling the presumably black background to fully show through. The user can adjust this threshold as needed.</p>
+
+
+<h2 id="options.threads"><a class="header" href="#options.threads" target="_self">Threads</a></h2>
+
+<p>By default, the conversion algorithm distributes work across all available logical processors. The user can reduce the number of allocated processors to as few as one, though this will result in longer processing times.</p>
+
+
+<h1 id="algorithm"><a class="header" href="#algorithm" target="_self">Algorithm</a></h1>
+
+<p>On the Windows desktop where the developer created ASCII Silhouettify, Terminal renders each monospaced character within a <span class="nowrap">9&times;19</span> pixel rectangle when configured with the default 12-points, 1.2-em Cascadia Mono font. The developer captured images of the 95 printable ASCII characters and thresholded them at 50% intensity, producing images containing only black and white pixels:</p>
+
+<p><img class="centered" id="./images/thresholded.png" src="./images/thresholded.png" alt="Thresholded characters"></p>
+
+<p>The algorithm separates the source image into unique color planes, each a white silhouette on a black background:</p>
+
+<p><img class="centered" id="./images/planes.png" src="./images/planes.png" alt="planes"></p>
+
+<p>The algorithm partitions each plane into a matrix of <span class="nowrap">9&times;19</span> pixel rectangular regions, every one of them destined to be replaced by an ASCII character. To select the optimal character, the algorithm compares a region pixel-by-pixel against every ASCII character image. If a white pixel in a character coincides with a black pixel in the region, the algorithm excludes the character to avoid distorting the silhouette's outline. Of the remaining characters, the algorithm selects the one with the maximum number of matching white pixels.</p>
+
+<p>When the algorithm replaces a region with an ASCII character, it records the number of matching white pixels. After converting all planes, the algorithm combines them by selecting the characters with the highest number of matching white pixels. Finally, it colors those characters based on the colors of the planes from which they originated.</p>
+
+<p>Prior to converting a source image, the algorithm sorts the ASCII character images by the number of white pixels. As shown below, the space character contains the fewest white pixels (zero), while the at sign contains the most.</p>
+
+[ sorted characters ]
+
+<p>The algorithm compares each region with the ASCII character images, starting with the at sign and moving downward. As soon as it finds a character that fully fits within the silhouette, the algorithm replaces the region with it because that character contains the greatest number of white pixels.</p>
+
+<p>To significantly speed up the process, the algorithm prepares <span class="nowrap">171 bitmasks</span>, one for each pixel of the <span class="nowrap">9&times;19</span> pixel rectangular regions. Each bitmask represents the set of ASCII characters images with a black pixel at the coordinates that uniquely identifies the bitmask.</p>
+
+<p>Specifically, each bitmask contains 95 bits, where each bit corresponds to an ASCII character image ordered by the number of white pixels: <span class="nowrap">bit-0</span> represents the space character, and <span class="nowrap">bit-94</span> represents the at sign. The algorithm clears all bits in all bitmasks. Then, for each black pixel in each ASCII character image, the algorithm sets the bit corresponding to the character in the bitmask associated with the pixel.</p>
+
+<p>During region conversion, the algorithm maintains a <span class="nowrap">95-bit</span> accumulator that represents a narrowing set of ASCII characters it can use for the replacement. When it begins to convert a region, the algorithm initializes the accumulator to all ones, indicating all characters are initially considered. Then, for each black pixel in the region, the algorithm updates the accumulator to the current accumulator value bitwise ANDed with the bitmask corresponding to the pixel. That operation excludes all ASCII character images with a white pixel at a location where a black pixel exists in the region.</p>
+
+<p>After the algorithm repeats that process across the region, the accumulator&lsquo;s set bits represent the remaining characters that can replace the region. Since the characters are ordered, the number of leading zeros in the accumulator is the index of the ASCII character image with the greatest number of white pixels fully contained within the plane&lsquo;s silhouette. With the help of a library, the algorithm invokes a microprocessor instruction for counting leading zeros to obtain the value it needs rapidly.</p>
+
+<p>When the algorithm partitions the source image into a matrix of rectangular regions, the origin of the matrix affects the outcome. To optimize the result, the algorithm repeats the entire image conversion for all integer-coordinate origins within a <span class="nowrap">9&times;19</span> pixel area around the image origin. It then returns the best result found. To manage the extensive processing required, the algorithm distributes the work among the available logical processors.</p>
+
+<p>Based on user configuration, the algorithm limits itself to a palette that ranges from just the first eight colors of the standard ANSI palette to the full <span class="nowrap">256-color</span> extended ANSI palette. To separate the source image into unique color planes, the algorithm employs the computationally expensive CIEDE2000 perceptual color difference formula to find the closest colors within the palette.</p>
+
+<hr>
+<footer>
+    <div class="left">
+        &copy; 2024 meatfighter.com<br>This content is licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" rel="license noopener noreferrer" style="display:inline-block;">CC BY-SA 4.0<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt="CC"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" alt="BY"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1" alt="SA"></a>
+    </div>
+    <div class="right">
+        <a href="https://meatfighter.com" target="_self">Home</a>
+    </div>
+</footer>
+
+<script src="./scripts/index.js">
+</script>
+</body>
+</html>

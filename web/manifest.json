@@ -1,0 +1,28 @@
+{
+  "short_name": "AS",
+  "name": "ASCII Silhouettify",
+  "description": "",
+  "icons": [
+    {
+      "src": "app/icons/google-touch-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "app/icons/google-touch-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "app/icons/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "scope": ".",
+  "start_url": "index.html",
+  "background_color": "#0C0C0C",
+  "theme_color": "#0C0C0C",
+  "display": "browser",
+  "lang": "en-US"
+}
