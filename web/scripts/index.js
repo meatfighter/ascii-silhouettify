@@ -3,8 +3,7 @@ function copyToClipboard(button) {
 }
 
 function init() {
-    const buttonContainer = document.querySelector(".button-container");
-    const buttons = buttonContainer.querySelectorAll(".button");
+    const buttons = document.querySelector(".button-container").querySelectorAll(".button");
     let maxWidth = 0;
 
     buttons.forEach(button => {
@@ -17,4 +16,4 @@ function init() {
     buttons.forEach(button => button.style.width = `${maxWidth}px`);
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", void init);
