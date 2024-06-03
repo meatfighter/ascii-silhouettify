@@ -16,4 +16,4 @@ function init() {
     buttons.forEach(button => button.style.width = `${maxWidth}px`);
 }
 
-document.addEventListener("DOMContentLoaded", void init);
+document.addEventListener("DOMContentLoaded", init);
