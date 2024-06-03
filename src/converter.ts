@@ -1,7 +1,7 @@
 import partitionArray from '@/array';
 import { Worker } from 'worker_threads';
 import { Image } from '@/images';
-import { GlyphInfo, HTML_HEIGHT, HTML_WIDTH } from '@/glyphs';
+import { GlyphInfo, HTML_WIDTH, TERM_HEIGHT, TERM_WIDTH } from '@/glyphs';
 import Ascii from '@/ascii';
 import Offset from '@/offset';
 import Task from '@/task';
@@ -12,22 +12,15 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
                                       fontSize: number, lineHeight: number, format: Format, palette: Palette,
                                       htmlColors: string[], workers: Worker[]): Promise<Ascii> {
 
-    let scaledGlyphWidth: number;
-    let scaledGlyphHeight: number;
-    let glyphScaleX: number;
-    let glyphScaleY: number;
-    if (format === Format.HTML) {
-        scaledGlyphWidth = HTML_WIDTH * fontSize / 12;
-        scaledGlyphHeight = lineHeight * fontSize * 96 / 72;
-        glyphScaleX = scaledGlyphWidth / (imageScale * HTML_WIDTH);
-        glyphScaleY = scaledGlyphHeight / (imageScale * HTML_HEIGHT);
-    } else {
-        scaledGlyphWidth = Math.round(glyphInfo.width * fontSize / 12);
-        scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
-        glyphScaleX = scaledGlyphWidth / (imageScale * glyphInfo.width);
-        glyphScaleY = scaledGlyphHeight / (imageScale * glyphInfo.height);
+    let scaledGlyphWidth = HTML_WIDTH * fontSize / 12;
+    let scaledGlyphHeight = lineHeight * fontSize * 96 / 72;
+    if (format !== Format.HTML) {
+        scaledGlyphWidth = Math.round(scaledGlyphWidth);
+        scaledGlyphHeight = Math.round(scaledGlyphHeight);
     }
 
+    const glyphScaleX = scaledGlyphWidth / (imageScale * TERM_WIDTH);
+    const glyphScaleY = scaledGlyphHeight / (imageScale * TERM_HEIGHT);
     const scaledImageWidth = imageScale * image.width;
     const scaledImageHeight = imageScale * image.height;
     const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
@@ -41,8 +34,8 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
 
     // Repeat the image conversion for various origins within a glyph-sized region and return the best one found.
     const offsets: Offset[] = [];
-    for (let y = -glyphInfo.height; y <= 0; ++y) {
-        for (let x = -glyphInfo.width; x <= 0; ++x) {
+    for (let y = -TERM_HEIGHT; y <= 0; ++y) {
+        for (let x = -TERM_WIDTH; x <= 0; ++x) {
             offsets.push(new Offset(x, y));
         }
     }

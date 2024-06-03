@@ -5,11 +5,12 @@ import Ascii from '@/ascii';
 import Task from '@/task';
 import { Format } from '@/format';
 import { Palette } from '@/colors';
+import { TERM_HEIGHT, TERM_WIDTH } from '@/glyphs';
 
 function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii {
 
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, format } = task;
-    const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs } = glyphInfo;
+    const { masks: glyphMasks, glyphs } = glyphInfo;
 
     let text = '';
     let matched = 0;
@@ -25,10 +26,10 @@ function toMonochromeAscii(task: Task, originX: number, originY: number): Ascii 
             // Attempt to substitute the region with a glyph starting with the character containing the most pixels down
             // to the space character. If any of the glyph's pixels coincide with a black pixel in image region, then
             // that character is excluded.
-            for (let y = 0; y < glyphHeight; ++y) {
+            for (let y = 0; y < TERM_HEIGHT; ++y) {
                 const glyphY = glyphOriginY + glyphScaleY * y;
-                const tableOffset = glyphWidth * y;
-                for (let x = 0; x < glyphWidth; ++x) {
+                const tableOffset = TERM_WIDTH * y;
+                for (let x = 0; x < TERM_WIDTH; ++x) {
                     const glyphX = glyphOriginX + glyphScaleX * x;
                     if (getIndex(image, glyphX, glyphY) === 0) {
                         const row = glyphMasks[tableOffset + x];
@@ -74,7 +75,7 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
 
     const { image, rows, rowScale, cols, colScale, glyphScaleX, glyphScaleY, glyphInfo, format, palette, htmlColors }
             = task;
-    const { width: glyphWidth, height: glyphHeight, masks: glyphMasks, glyphs, minCount: glyphMinCount } = glyphInfo;
+    const { masks: glyphMasks, glyphs, minCount: glyphMinCount } = glyphInfo;
 
     const region = new Array<number>(3);
     const colorIndexCounts = new Map<number, number>();
@@ -91,9 +92,9 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
 
             // Count the number of times each color index appears in the rectangular region to be replaced by a glyph.
             colorIndexCounts.clear();
-            for (let y = 0; y < glyphHeight; ++y) {
+            for (let y = 0; y < TERM_HEIGHT; ++y) {
                 const glyphY = glyphOriginY + glyphScaleY * y;
-                for (let x = 0; x < glyphWidth; ++x) {
+                for (let x = 0; x < TERM_WIDTH; ++x) {
                     const glyphX = glyphOriginX + glyphScaleX * x;
                     const colorIndex = getIndex(image, glyphX, glyphY);
 
@@ -129,10 +130,10 @@ function toColorAscii(task: Task, originX: number, originY: number): Ascii {
                 region[2] = 0x7FFFFFFF;
                 region[1] = region[0] = 0xFFFFFFFF;
 
-                for (let y = 0; y < glyphHeight; ++y) {
+                for (let y = 0; y < TERM_HEIGHT; ++y) {
                     const glyphY = glyphOriginY + glyphScaleY * y;
-                    const tableOffset = glyphWidth * y;
-                    for (let x = 0; x < glyphWidth; ++x) {
+                    const tableOffset = TERM_WIDTH * y;
+                    for (let x = 0; x < TERM_WIDTH; ++x) {
                         const glyphX = glyphOriginX + glyphScaleX * x;
                         if (getIndex(image, glyphX, glyphY) !== colorIndex) {
                             const row = glyphMasks[tableOffset + x];
