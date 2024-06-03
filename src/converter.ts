@@ -1,7 +1,7 @@
 import partitionArray from '@/array';
 import { Worker } from 'worker_threads';
 import { Image } from '@/images';
-import { GlyphInfo } from '@/glyphs';
+import { GlyphInfo, HTML_HEIGHT, HTML_WIDTH } from '@/glyphs';
 import Ascii from '@/ascii';
 import Offset from '@/offset';
 import Task from '@/task';
@@ -12,8 +12,22 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
                                       fontSize: number, lineHeight: number, format: Format, palette: Palette,
                                       htmlColors: string[], workers: Worker[]): Promise<Ascii> {
 
-    const scaledGlyphWidth = glyphInfo.width * fontSize / 12;
-    const scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
+    let scaledGlyphWidth: number;
+    let scaledGlyphHeight: number;
+    let glyphScaleX: number;
+    let glyphScaleY: number;
+    if (format === Format.HTML) {
+        scaledGlyphWidth = HTML_WIDTH * fontSize / 12;
+        scaledGlyphHeight = lineHeight * fontSize * 96 / 72;
+        glyphScaleX = scaledGlyphWidth / (imageScale * HTML_WIDTH);
+        glyphScaleY = scaledGlyphHeight / (imageScale * HTML_HEIGHT);
+    } else {
+        scaledGlyphWidth = Math.round(glyphInfo.width * fontSize / 12);
+        scaledGlyphHeight = Math.round(lineHeight * fontSize * 96 / 72);
+        glyphScaleX = scaledGlyphWidth / (imageScale * glyphInfo.width);
+        glyphScaleY = scaledGlyphHeight / (imageScale * glyphInfo.height);
+    }
+
     const scaledImageWidth = imageScale * image.width;
     const scaledImageHeight = imageScale * image.height;
     const rows = Math.ceil(scaledImageHeight / scaledGlyphHeight);
@@ -22,8 +36,6 @@ export default async function convert(image: Image, glyphInfo: GlyphInfo, color:
     const paddedHeight = Math.ceil(rows * scaledGlyphHeight);
     const marginX = (scaledImageWidth - paddedWidth) / 2;
     const marginY = (scaledImageHeight - paddedHeight) / 2;
-    const glyphScaleX = scaledGlyphWidth / (imageScale * glyphInfo.width);
-    const glyphScaleY = scaledGlyphHeight / (imageScale * glyphInfo.height);
     const rowScale = scaledGlyphHeight / imageScale;
     const colScale = scaledGlyphWidth / imageScale;
 
