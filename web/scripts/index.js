@@ -1,3 +1,7 @@
+function copyToClipboard(button) {
+    void navigator.clipboard.writeText(button.parentElement.querySelector('pre').innerText.trim());
+}
+
 function init() {
     const buttonContainer = document.querySelector(".button-container");
     const buttons = buttonContainer.querySelectorAll(".button");

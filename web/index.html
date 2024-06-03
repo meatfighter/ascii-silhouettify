@@ -15,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&family=Open+Sans&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="./styles/index.css?v=2024-06-02" type="text/css">
 
     <script>
@@ -72,7 +73,7 @@
 
 <p><img class="centered" id="./images/neofetch-1.png" src="./images/neofetch-1.png" alt="Ubuntu logo"></p>
 
-<p>We run it through ASCII Silhouettify:</p>
+<p>We run it through the command-line version of ASCII Silhouettify:</p>
 
 <p><img class="centered" id="./images/neofetch-2.png" src="./images/neofetch-2.png" alt="Ubuntu logo ANSI art"></p>
 
@@ -98,7 +99,7 @@
 
 <p><img class="centered" id="./images/neofetch-7.png" src="./images/neofetch-7.png" alt="Logos overlaid"></p>
 
-<p>Note how the algorithm selects the largest characters that fit within outlines of each colored region.</p>
+<p>Note how the algorithm selects the largest characters that fit within the outlines of each colored region.</p>
 
 
 <h1 id="galleries"><a class="header" href="#galleries" target="_self">Galleries</a></h1>
@@ -119,22 +120,34 @@
 
 <p>In the Windows Command Prompt or PowerShell (but not WSL), run:</p>
 
-<pre class="code">npm install -g ascii-silhouettify</pre>
+<div class="code-container">
+    <pre class="code">npm install -g ascii-silhouettify</pre>
+    <button class="copy-btn" onclick="copyToClipboard(this)"><span class="material-symbols-outlined">content_copy</span></button>
+</div>
 
 <p>On macOS and Linux (including WSL), you need to use <code>sudo</code>:</p>
 
-<pre class="code">sudo npm install -g ascii-silhouettify</pre>
+<div class="code-container">
+    <pre class="code">sudo npm install -g ascii-silhouettify</pre>
+    <button class="copy-btn" onclick="copyToClipboard(this)"><span class="material-symbols-outlined">content_copy</span></button>
+</div>
 
 
 <h1 id="uninstall"><a class="header" href="#uninstall" target="_self">Uninstall</a></h1>
 
 <p>In the Windows Command Prompt or PowerShell (but not WSL), run:</p>
 
-<pre class="code">npm uninstall -g ascii-silhouettify</pre>
+<div class="code-container">
+    <pre class="code">npm uninstall -g ascii-silhouettify</pre>
+    <button class="copy-btn" onclick="copyToClipboard(this)"><span class="material-symbols-outlined">content_copy</span></button>
+</div>
 
 <p>On macOS and Linux (including WSL), you need to use <code>sudo</code>:</p>
 
-<pre class="code">sudo npm uninstall -g ascii-silhouettify</pre>
+<div class="code-container">
+    <pre class="code">sudo npm uninstall -g ascii-silhouettify</pre>
+    <button class="copy-btn" onclick="copyToClipboard(this)"><span class="material-symbols-outlined">content_copy</span></button>
+</div>
 
 
 <h1 id="options"><a class="header" href="#options" target="_self">Options</a></h1>
@@ -144,7 +157,7 @@
 
 <h2 id="options.input"><a class="header" href="#options.input" target="_self">Input</a></h2>
 
-<p>ASCII Silhouettify can convert multiple images at the same time. It supports <code>png</code>, <code>svg</code>, <code>jpg</code>, <code>webp</code>, <code>gif</code>, <code>tif</code>, <code>heif</code>, <code>avif</code>, and <code>pdf</code> image formats. The command-line version&lsquo;s <code>-i</code> flag accepts various filename pattern-matching rules (see the help message for details).</p>
+<p>ASCII Silhouettify can convert multiple images at the same time. It supports <code>png</code>, <code>svg</code>, <code>jpg</code>, <code>webp</code>, <code>gif</code>, <code>tif</code>, <code>heif</code>, <code>avif</code>, and <code>pdf</code> image formats. The command-line version&lsquo;s <code>-i</code> flag accepts various filename pattern-matching rules (see the help message for details). The input images should have black or transparent backgrounds.</p>
 
 
 <h2 id="options.output"><a class="header" href="#options.output" target="_self">Output</a></h2>
@@ -164,53 +177,79 @@
 
 <h2 id="options.font-size-and-line-height"><a class="header" href="#options.font-size-and-line-height" target="_self">Font Size and Line Height</a></h2>
 
-<p>The aspect ratio of the generated ASCII art depends on the terminal emulator&lsquo;s font, font size, and line height. To perfect it, capture an image of text in the terminal, and measure the size of each monospaced character in pixels. For example, in the IntelliJ terminal, each character occupies <span class="nowrap">8&times;22</span> pixels:</p>
+<p>When viewed in a terminal emulator, the aspect ratio of the generated ASCII art depends on the font, font size, line height, and the rounding rules for character dimensions. To optimize it, capture an image of text in the terminal, and measure the size of each monospaced character in pixels, including the space between lines:</p>
 
 <p><img class="centered" id="./images/intellij.png" src="./images/intellij.png" alt="Intellij terminal"></p>
 
-<p>Plug the values into the following formula to determine the line height for any font size.</p>
+<p>Plug the values into the following formulae to determine font size and line height settings.</p>
 
-<p class="centered">$\text{line height} = \dfrac{9 \times \text{character height}}{16 \times \text{character width}}$</p>
+<p class="centered">$\text{font size} = \dfrac{\text{character width}+a}{.78}, a \in [-0.5, 0.5)$</p>
 
-<p>The formula assumes a standard screen resolution of <span class="nowrap">96 PPI</span> for the conversion from pixels to points. And the font size does not matter because line height is in em, a unit relative to the font size.</p>
+<p class="centered">$\text{line height} = \dfrac{.75 (\text{character height} + b)}{\text{font size}}, b \in [-0.5, 0.5) $</p>
 
-<p>Here are some line heights measured on the developer&lsquo;s Windows desktop:</p>
+<p>Select arbitrary values for $a$ and $b$ within the range $-0.5$ to $0.5$.</p>
+
+<p>Here are some measured character dimensions and suggested settings based on the developer’s Windows desktop:</p>
 
 <table>
     <thead>
     <tr>
         <th>Application</th>
+        <th>Character Width</th>
+        <th>Character Height</th>
+        <th>Font Size</th>
         <th>Line Height</th>
     </tr>
     </thead>
     <tbody>
     <tr>
-        <td>IntelliJ Terminal</td>
-        <td>1.546875</td>
+        <td class="left">IntelliJ Terminal</td>
+        <td class="right">8</td>
+        <td class="right">22</td>
+        <td class="right">10</td>
+        <td class="right">1.65</td>
     </tr>
     <tr>
-        <td>Putty</td>
-        <td>1.125</td>
+        <td class="left">Putty</td>
+        <td class="right">8</td>
+        <td class="right">16</td>
+        <td class="right">10</td>
+        <td class="right">1.2</td>
     </tr>
     <tr>
-        <td>Notepad</td>
-        <td>1.0125</td>
+        <td class="left">Notepad</td>
+        <td class="right">10</td>
+        <td class="right">18</td>
+        <td class="right">13</td>
+        <td class="right">1.04</td>
     </tr>
     <tr>
-        <td>Notepad++</td>
-        <td>1.2</td>
+        <td class="left">Notepad++</td>
+        <td class="right">9</td>
+        <td class="right">19</td>
+        <td class="right">12</td>
+        <td class="right">1.2</td>
     </tr>
     <tr>
-        <td>Windows Command Prompt</td>
-        <td>1.125</td>
+        <td class="left">Windows Command Prompt</td>
+        <td class="right">8</td>
+        <td class="right">16</td>
+        <td class="right">10</td>
+        <td class="right">1.2</td>
     </tr>
     <tr>
-        <td>Windows Console Host</td>
-        <td>1.25</td>
+        <td class="left">Windows Console Host</td>
+        <td class="right">9</td>
+        <td class="right">20</td>
+        <td class="right">12</td>
+        <td class="right">1.25</td>
     </tr>
     <tr>
-        <td>Windows Terminal</td>
-        <td>1.2</td>
+        <td class="left">Windows Terminal</td>
+        <td class="right">9</td>
+        <td class="right">19</td>
+        <td class="right">12</td>
+        <td class="right">1.2</td>
     </tr>
     </tbody>
 </table>
@@ -249,21 +288,21 @@
 
 <p>Prior to converting a source image, the algorithm sorts the ASCII character images by the number of white pixels. As shown below, the space character contains the fewest white pixels (zero), while the at sign contains the most.</p>
 
-[ sorted characters ]
+<p><img class="centered" id="./images/sorted.png" src="./images/sorted.png" alt="Sorted characters"></p>
 
 <p>The algorithm compares each region with the ASCII character images, starting with the at sign and moving downward. As soon as it finds a character that fully fits within the silhouette, the algorithm replaces the region with it because that character contains the greatest number of white pixels.</p>
 
 <p>To significantly speed up the process, the algorithm prepares <span class="nowrap">171 bitmasks</span>, one for each pixel of the <span class="nowrap">9&times;19</span> pixel rectangular regions. Each bitmask represents the set of ASCII characters images with a black pixel at the coordinates that uniquely identifies the bitmask.</p>
 
-<p>Specifically, each bitmask contains 95 bits, where each bit corresponds to an ASCII character image ordered by the number of white pixels: <span class="nowrap">bit-0</span> represents the space character, and <span class="nowrap">bit-94</span> represents the at sign. The algorithm clears all bits in all bitmasks. Then, for each black pixel in each ASCII character image, the algorithm sets the bit corresponding to the character in the bitmask associated with the pixel.</p>
+<p>Specifically, each bitmask contains <span class="nowrap">95 bits</span>, where each bit corresponds to an ASCII character image ordered by the number of white pixels: <span class="nowrap">bit-0</span> represents the space character, and <span class="nowrap">bit-94</span> represents the at sign. The algorithm clears all bits in all bitmasks. Then, for each black pixel in each ASCII character image, the algorithm sets the bit corresponding to the character in the bitmask associated with the pixel.</p>
 
 <p>During region conversion, the algorithm maintains a <span class="nowrap">95-bit</span> accumulator that represents a narrowing set of ASCII characters it can use for the replacement. When it begins to convert a region, the algorithm initializes the accumulator to all ones, indicating all characters are initially considered. Then, for each black pixel in the region, the algorithm updates the accumulator to the current accumulator value bitwise ANDed with the bitmask corresponding to the pixel. That operation excludes all ASCII character images with a white pixel at a location where a black pixel exists in the region.</p>
 
-<p>After the algorithm repeats that process across the region, the accumulator&lsquo;s set bits represent the remaining characters that can replace the region. Since the characters are ordered, the number of leading zeros in the accumulator is the index of the ASCII character image with the greatest number of white pixels fully contained within the plane&lsquo;s silhouette. With the help of a library, the algorithm invokes a microprocessor instruction for counting leading zeros to obtain the value it needs rapidly.</p>
+<p>After the algorithm repeats that process across the region, the accumulator&lsquo;s set bits represent the remaining characters that can replace the region. Since the characters are ordered, the number of leading zeros in the accumulator is the index of the ASCII character image with the greatest number of white pixels fully contained within the plane&lsquo;s silhouette. With the help of a library, the algorithm invokes a microprocessor instruction for <a href="https://en.wikipedia.org/wiki/Find_first_set">counting leading zeros</a> to obtain the value it needs rapidly.</p>
 
 <p>When the algorithm partitions the source image into a matrix of rectangular regions, the origin of the matrix affects the outcome. To optimize the result, the algorithm repeats the entire image conversion for all integer-coordinate origins within a <span class="nowrap">9&times;19</span> pixel area around the image origin. It then returns the best result found. To manage the extensive processing required, the algorithm distributes the work among the available logical processors.</p>
 
-<p>Based on user configuration, the algorithm limits itself to a palette that ranges from just the first eight colors of the standard ANSI palette to the full <span class="nowrap">256-color</span> extended ANSI palette. To separate the source image into unique color planes, the algorithm employs the computationally expensive CIEDE2000 perceptual color difference formula to find the closest colors within the palette.</p>
+<p>Based on user configuration, the algorithm limits itself to a palette that ranges from just the first eight colors of the standard ANSI palette to the full <span class="nowrap">256-color</span> extended ANSI palette. To separate the source image into unique color planes, the algorithm employs the computationally expensive <a href="http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE2000.html">CIEDE2000</a> perceptual color difference formula to find the closest colors within the palette.</p>
 
 <hr>
 <footer>

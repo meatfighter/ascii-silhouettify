@@ -189,6 +189,12 @@ img.inline {
     vertical-align: middle;
 }
 
+.code-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
 pre.code {
     font-family: 'Source Code Pro', monospace;
     font-size: 16px;
@@ -210,6 +216,21 @@ pre::-webkit-scrollbar-thumb {
     border: 3px solid #424242;
 }
 
+.copy-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: none;
+    border: none;
+    color: #E6EDF3;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.copy-btn:hover {
+    color: #C1C7CC;
+}
+
 table {
     border-collapse: collapse;
     margin-left: auto;
@@ -223,18 +244,25 @@ thead {
 th {
     font-weight: bold;
     text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 td {
-
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
-td:first-child {
+td.left {
     text-align: left;
 }
 
-td:last-child {
+td.right {
     text-align: right;
+}
+
+th:nth-child(3), td:nth-child(3) {
+    border-right: 1px solid #E6EDF3;
 }
 
 footer {
