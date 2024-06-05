@@ -16,19 +16,15 @@ function copyToClipboard(button) {
     void navigator.clipboard.writeText(button.parentElement.querySelector('pre').innerText.trim());
 }
 
-function goToPage(url) {
-    window.location.href = url;
-}
-
 function initButtonListeners() {
     document.querySelectorAll('.copy-btn').forEach(button => button.addEventListener('click',
             () => copyToClipboard(button)))
     document.getElementById('launch-browser-version-button').addEventListener('click',
-            () => goToPage('spa/index.html'));
+            () => window.open('spa/index.html', '_self'));
     document.getElementById('color-gallery-button').addEventListener('click',
-            () => goToPage('color-gallery.html'));
+            () => window.open('color-gallery.html', '_blank'));
     document.getElementById('monochrome-gallery-button').addEventListener('click',
-            () => goToPage('monochrome-gallery.html'));
+            () => window.open('monochrome-gallery.html', '_blank'));
 }
 
 function init() {
