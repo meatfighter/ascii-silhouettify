@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "module": "./dist/main.bundle.js",
+  "private": false,
   "scripts": {
     "clean": "rimraf ./dist ./bin",
     "build": "npm run clean && rollup -c",
@@ -39,5 +40,18 @@
     "chroma-js": "^2.4.2",
     "glob": "^10.3.12",
     "sharp": "^0.33.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meatfighter/ascii-silhouettify"
+  },
+  "keywords": [
+    "ascii art",
+    "ansi art",
+    "text art",
+    "image2ascii",
+    "image2ansi",
+    "image2text"
+  ],
+  "homepage": "https://meatfighter.com/ascii-silhouettify/"
 }

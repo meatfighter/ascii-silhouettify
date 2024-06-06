@@ -14,6 +14,8 @@ import { ensureDirectoryExists, extractFilenameWithoutExtension, writeTextToFile
 import { getHtmlFooter, getHtmlHeader } from '@/html';
 import { Format } from '@/format';
 
+const IMAGE_LOAD_ERROR = 1;
+
 function printUsage() {
     console.log(`
 Usage: ascii-silhouette [options]
@@ -208,7 +210,11 @@ async function main() {
     const colored = !((args.get('monochrome') as boolean | undefined) || false);
 
     let palette: Palette;
-    switch ((args.get('palette') as number | undefined) || 240) {
+    let pal = args.get('palette') as number | undefined;
+    if (pal === undefined) {
+        pal = 240;
+    }
+    switch (pal) {
         case 8:
             palette = Palette.STANDARD_8;
             break;
@@ -226,7 +232,10 @@ async function main() {
             return;
     }
 
-    const colors = (args.get('colors') as number | undefined) || (format === Format.NEOFETCH ? 6 : 255);
+    let colors = args.get('colors') as number | undefined;
+    if (colors === undefined) {
+        colors = (format === Format.NEOFETCH) ? 6 : 255;
+    }
     if (format === Format.NEOFETCH) {
         if (colors < 1 || colors > 6) {
             console.log('\nWhen format is neofetch, colors is restricted to 1--6.\n');
@@ -237,32 +246,47 @@ async function main() {
         return;
     }
 
-    const fontSize = (args.get('font-size') as number | undefined) || 12;
+    let fontSize = args.get('font-size') as number | undefined;
+    if (fontSize === undefined) {
+        fontSize = 12;
+    }
     if (fontSize <= 0) {
         console.log('\nFont size must be >= 0.\n');
         return;
     }
 
-    const lineHeight = (args.get('line-height') as number | undefined) || 1.2;
+    let lineHeight = args.get('line-height') as number | undefined;
+    if (lineHeight === undefined) {
+        lineHeight = 1.2;
+    }
     if (lineHeight <= 0) {
         console.log('\nLine height must be >= 0.\n');
         return;
     }
 
-    const scale = (args.get('scale') as number | undefined) || 1;
+    let scale = args.get('scale') as number | undefined;
+    if (scale === undefined) {
+        scale = 1;
+    }
     if (scale <= 0) {
         console.log('\nScale must be >= 0.\n');
         return;
     }
 
-    const darkness = (args.get('darkness') as number | undefined) || 5;
+    let darkness = args.get('darkness') as number | undefined;
+    if (darkness === undefined) {
+        darkness = 5;
+    }
     if (darkness < 0 || darkness > 100) {
         console.log('\nDarkness is restricted to 0--100.\n');
         return;
     }
 
     const logicalProcessors = os.cpus().length;
-    const threads = (args.get('threads') as number | undefined) || logicalProcessors;
+    let threads = args.get('threads') as number | undefined;
+    if (threads === undefined) {
+        threads = logicalProcessors;
+    }
     if (threads < 1) {
         console.log('\nProcessing requires a minimum of one thread.\n');
         return;
@@ -291,7 +315,7 @@ async function main() {
             image = await loadImage(inputFilenames[i], palette, colors, darkness);
         } catch {
             console.log(`\nFailed to load input image file: ${inputFilenames[i]}\n`);
-            return;
+            process.exit(IMAGE_LOAD_ERROR);
         }
         const ascii = await convert(image, glyphInfo, colored, scale, fontSize, lineHeight, format, palette,
                 htmlColors, workers);
