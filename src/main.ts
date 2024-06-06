@@ -295,7 +295,11 @@ async function main() {
         }
         const ascii = await convert(image, glyphInfo, colored, scale, fontSize, lineHeight, format, palette,
                 htmlColors, workers);
-        result += ascii.text;
+        if (format === Format.HTML) {
+            result += '<pre>' + ascii.text + '</pre>';
+        } else {
+            result += ascii.text;
+        }
     }
 
     if (format === Format.HTML) {

@@ -17,20 +17,20 @@ export function getHtmlHeader(title: string, fontSize: number, lineHeight: numbe
         background: #0C0C0C;
         color: #CCCCCC;
         text-align: center;
+        margin: 19px 0;
       }
       pre {
         font-family: 'Cascadia Code', sans-serif;
-        font-size: ${fontSize}pt; 
+        font-size: ${fontSize}pt;
         line-height: ${lineHeight};
+        margin: 10px 0;
       }        
     </style>    
 </head>
-<body>
-    <pre>`;
+<body>`;
 }
 
 export function getHtmlFooter() {
-    return `    </pre>   
-</body>
+    return `</body>
 </html>`;
 }
