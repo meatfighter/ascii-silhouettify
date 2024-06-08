@@ -12,7 +12,8 @@
     "all": "npm run build && npm run pack",
     "install-global": "npm install -g ./bin/ascii-silhouettify.tgz",
     "uninstall-global": "npm uninstall -g ascii-silhouettify",
-    "run-global": "ascii-silhouettify"
+    "run-global": "ascii-silhouettify",
+    "test": "jest"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
@@ -20,12 +21,16 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/chroma-js": "^2.4.4",
     "@types/glob": "^8.1.0",
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.12.2",
     "@types/sharp": "^0.32.0",
+    "jest": "^29.7.0",
     "rimraf": "^5.0.5",
     "rollup": "^4.13.0",
     "rollup-plugin-copy": "^3.5.0",
     "shx": "^0.3.4",
+    "ts-jest": "^29.1.4",
+    "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
     "tsx": "^4.7.1",
     "typescript": "^5.4.5"
