@@ -1,4 +1,4 @@
-import { loadHtmlColors, findClosestColorIndexAmong, findClosestColorIndex, Palette } from "@/colors";
+import { loadHtmlColors, findClosestColorIndexAmong, findClosestColorIndex, Palette, clearClosestColorCache } from "@/colors";
 
 describe('colors', () => {
     describe('loadHtmlColors', () => {
@@ -272,6 +272,10 @@ describe('colors', () => {
             loadHtmlColors();
         });
 
+        beforeEach(() => {
+            clearClosestColorCache();
+        });
+
         it('should return the closest color index based on darkness and RGBA values', () => {
             const indices = [0, 1, 2, 3, 4];
             const result = findClosestColorIndexAmong(indices, 50, 255, 255, 255, 255);
@@ -282,6 +286,10 @@ describe('colors', () => {
     describe('findClosestColorIndex', () => {
         beforeAll(() => {
             loadHtmlColors();
+        });
+
+        beforeEach(() => {
+            clearClosestColorCache();
         });
 
         it('should return the closest color index based on darkness and RGBA values', () => {
