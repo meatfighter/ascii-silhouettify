@@ -18,7 +18,7 @@ const IMAGE_LOAD_ERROR = 1;
 
 function printUsage() {
     console.log(`
-Usage: ascii-silhouette [options]
+Usage: ascii-silhouettify [options]
 
 Required Values:
   -i, --input "..." ["..."]  Input image filename(s) 
@@ -158,7 +158,7 @@ async function main() {
     }
 
     if (args.get('version') as boolean | undefined) {
-        console.log('\n1.0.0\n');
+        console.log('\n1.0.1\n');
         return;
     }
 
