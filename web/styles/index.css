@@ -317,3 +317,33 @@ footer img {
 hr {
     margin-top: 60px;
 }
+
+ol, ul {
+    font-size: 16px;
+    line-height: 27px;
+    font-weight: 300;
+    list-style: none;
+    counter-reset: item;
+}
+
+ol li, ul li {
+    margin-left: 20px;
+    position: relative;
+}
+
+ol li::before, ul li::before {
+    position: absolute;
+    left: -3em;
+    width: 2em;
+    text-align: right;
+}
+
+ol li::before {
+    content: counter(item) ". ";
+    counter-increment: item;
+}
+
+ul li::before {
+    content: "\2022 ";
+    font-weight: bold;
+}
