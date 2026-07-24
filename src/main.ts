@@ -158,7 +158,7 @@ async function main() {
     }
 
     if (args.get('version') as boolean | undefined) {
-        console.log('\n1.0.2\n');
+        console.log('\n2.0.0\n');
         return;
     }
 

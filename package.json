@@ -1,6 +1,6 @@
 {
   "name": "ascii-silhouettify",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A command-line app that converts images into ASCII silhouettes, a style of ASCII art distinguished by uniformly filled geometric shapes rather than lines or textures.",
   "type": "module",
   "module": "./dist/main.bundle.js",
@@ -13,38 +13,37 @@
     "all": "npm run build && npm run pack",
     "install-global": "npm install -g ./bin/ascii-silhouettify.tgz",
     "uninstall-global": "npm uninstall -g ascii-silhouettify",
-    "run-global": "ascii-silhouettify"
+    "run-global": "ascii-silhouettify",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.8",
-    "@rollup/plugin-node-resolve": "^15.3.1",
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
     "@types/chroma-js": "^2.4.5",
-    "@types/glob": "^8.1.0",
     "@types/node": "^20.17.14",
-    "@types/sharp": "^0.32.0",
-    "rimraf": "^5.0.10",
-    "rollup": "^4.31.0",
+    "rimraf": "^6.1.3",
+    "rollup": "^4.62.2",
     "rollup-plugin-copy": "^3.5.0",
-    "shx": "^0.3.4",
+    "shx": "^0.4.0",
     "tslib": "^2.8.1",
-    "tsx": "^4.19.2",
+    "tsx": "^4.23.1",
     "typescript": "^5.7.3"
   },
   "files": [
     "dist"
   ],
   "bin": {
-    "ascii-silhouettify": "./dist/main.bundle.js"
+    "ascii-silhouettify": "dist/main.bundle.js"
   },
   "dependencies": {
     "chroma-js": "^2.6.0",
-    "glob": "^10.4.5",
-    "sharp": "^0.33.5"
+    "glob": "^13.0.6",
+    "sharp": "^0.35.3"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/meatfighter/ascii-silhouettify"
+    "url": "git+https://github.com/meatfighter/ascii-silhouettify.git"
   },
   "keywords": [
     "ascii art",
@@ -55,5 +54,8 @@
     "image2text"
   ],
   "homepage": "https://meatfighter.com/ascii-silhouettify/",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "engines": {
+    "node": ">=20.9.0"
+  }
 }
